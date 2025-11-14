@@ -1,4 +1,5 @@
 import "./globals.css";
+import type { ReactNode } from "react";
 import Sidebar from "@/components/Sidebar";
 
 export const metadata = {
@@ -6,14 +7,13 @@ export const metadata = {
   description: "Gestión de Análisis BIA y Procesos Críticos",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es">
       <body className="min-h-screen bg-[#c5d0e4] flex">
         <Sidebar />
 
-        {/* Contenido principal */}
-        <main className="flex-1 p-10 overflow-x-hidden">
+        <main className="flex-1 p-6 overflow-x-hidden">
           {children}
         </main>
       </body>

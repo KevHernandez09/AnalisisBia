@@ -155,7 +155,7 @@ export default function AnalisisBIA() {
       <div className="w-full overflow-x-auto border rounded">
         <table className="min-w-[1200px] w-full border-collapse">
           <thead>
-            <tr className="bg-blue-800 text-white text-[13px]">
+            <tr className="bg-[#0073a4] text-white text-[13px]">
               <th className="border px-2 py-2 text-left">
                 Área de la Gerencia o Departamento
               </th>
@@ -192,7 +192,7 @@ export default function AnalisisBIA() {
                 Prioridad de recuperación
               </th>
             </tr>
-            <tr className="bg-blue-700 text-white text-[12px]">
+            <tr className="bg-[#0073a4] text-white text-[12px]">
               {Array.from({ length: 7 }).map((_, i) => (
                 <th key={i} className="border px-2 py-1"></th>
               ))}

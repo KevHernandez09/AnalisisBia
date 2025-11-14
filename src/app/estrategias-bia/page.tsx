@@ -224,11 +224,11 @@ export default function EstrategiasContinuidadPage() {
       </div>
 
       {/* Tabla adaptada a la plantilla */}
-      <div className="mt-4 bg-white border rounded shadow-sm">
+      <div className="mt-4 bg-[#0073a4] border rounded shadow-sm">
         <div className="w-full overflow-x-auto">
           <table className="min-w-[1800px] border-collapse">
             <thead>
-              <tr className="bg-gray-200 text-[12px]">
+              <tr className="bg-[#0073a4]-200 text-white text-[13px]">
                 <th className="border px-2 py-2 text-left">
                   Nombre del Proceso Crítico
                 </th>

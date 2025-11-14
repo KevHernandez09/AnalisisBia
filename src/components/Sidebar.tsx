@@ -9,17 +9,11 @@ import {
   FolderPlus,
   LifeBuoy,
   BookOpen,
+  ClipboardCheck,
 } from "lucide-react";
-import { useEffect, useState } from "react";
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    // Esto solo corre en el cliente, después de la hidratación
-    setMounted(true);
-  }, []);
 
   const links = [
     {
@@ -35,7 +29,7 @@ export default function Sidebar() {
     {
       href: "/proceso-critico",
       label: "Insertar Proceso Crítico",
-      icon: <FolderPlus size={18} />,
+      icon: <ClipboardCheck size={18} />,
     },
     {
       href: "/continuidad",
@@ -44,51 +38,8 @@ export default function Sidebar() {
     },
   ];
 
-  // 🔹 En servidor y en la PRIMERA render del cliente, mostramos
-  //     un sidebar estático muy simple (sin pathname, sin iconos dinámicos).
-  if (!mounted) {
-    return (
-      <aside
-        className="
-          w-64
-          min-h-screen
-          bg-[#0d1721]
-          text-gray-200
-          border-r border-gray-800
-          flex flex-col
-          select-none
-        "
-      >
-        <div className="px-6 py-5 border-b border-gray-800">
-          <h1 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
-            Menú
-          </h1>
-        </div>
-
-        <div className="flex-1 px-6 py-4 text-xs text-gray-500">
-          Cargando menú...
-        </div>
-
-        <div className="mt-auto border-t border-gray-800 px-6 py-4 text-xs text-gray-500">
-          Cargando ayuda...
-        </div>
-      </aside>
-    );
-  }
-
-  // 🔹 Una vez montado en cliente, render normal con pathname + iconos
   return (
-    <aside
-      className="
-        w-64
-        min-h-screen
-        bg-[#0d1721]
-        text-gray-200
-        border-r border-gray-800
-        flex flex-col
-        select-none
-      "
-    >
+    <aside className="w-64 min-h-screen bg-[#0073a4] text-gray-200 border-r border-gray-800 flex flex-col select-none">
       {/* HEADER */}
       <div className="px-6 py-5 border-b border-gray-800">
         <h1 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
