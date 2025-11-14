@@ -167,8 +167,8 @@ export default function InsertarProcesoCriticoPage() {
       setPending(false);
     }
   }
-
-  const fieldClass = "w-full border rounded p-2 bg-white text-black";
+  //Color combo box
+  const fieldClass = "w-full border rounded p-2 bg-[white]";
 
   return (
     <section className="text-black max-w-5xl">
@@ -189,7 +189,7 @@ export default function InsertarProcesoCriticoPage() {
         
         {/* DEPARTAMENTO */}
         <div>
-          <label className="font-semibold">Departamento</label>
+          <label className="font-semibold text-[#0073a4]">Departamento</label>
           <select name="departamentoId" defaultValue="" className={fieldClass}>
             <option value="" disabled>Seleccione...</option>
             {departamentos.map((d) => (
@@ -202,15 +202,15 @@ export default function InsertarProcesoCriticoPage() {
         </div>
 
         {/* SUBÁREAS */}
-        <fieldset className="md:col-span-2 border rounded p-3">
-          <legend className="font-semibold">Subáreas</legend>
+        <fieldset className="md:col-span-2 border rounded p-3 bg-[white]">
+          <legend className="font-semibold text-[#0073a4] ">Subáreas</legend>
           {errors.subAreaIds && (
             <p className="text-sm text-red-600 mb-1">{errors.subAreaIds}</p>
           )}
 
-          <div className="grid md:grid-cols-3 gap-2">
+          <div className="grid md:grid-cols-3 gap-2 bg-[white]">
             {subAreas.map((s) => (
-              <label key={s.id} className="flex gap-2 items-center">
+              <label key={s.id} className="flex gap-2 items-center ">
                 <input type="checkbox" name="subAreaIds" value={s.id} />
                 {s.label}
               </label>
@@ -220,13 +220,13 @@ export default function InsertarProcesoCriticoPage() {
 
         {/* CAMPOS GENERALES */}
         <div>
-          <label className="font-semibold">Nombre</label>
+          <label className="font-semibold text-[#0073a4]">Nombre</label>
           <input name="nombre" className={fieldClass} />
           {errors.nombre && <p className="text-sm text-red-600">{errors.nombre}</p>}
         </div>
 
         <div>
-          <label className="font-semibold">Prioridad</label>
+          <label className="font-semibold text-[#0073a4]">Prioridad</label>
           <select name="prioridad" defaultValue="" className={fieldClass}>
             <option value="" disabled>Seleccione...</option>
             {prioridades.map((p) => (
@@ -237,59 +237,59 @@ export default function InsertarProcesoCriticoPage() {
         </div>
 
         <div className="md:col-span-2">
-          <label className="font-semibold">Descripción</label>
+          <label className="font-semibold text-[#0073a4]">Descripción</label>
           <textarea name="descripcion" rows={3} className={fieldClass} />
           {errors.descripcion && <p className="text-sm text-red-600">{errors.descripcion}</p>}
         </div>
 
         {/* CAMPOS RESTANTES */}
         <div>
-          <label className="font-semibold">Entradas</label>
+          <label className="font-semibold text-[#0073a4]">Entradas</label>
           <textarea name="entradas" rows={2} className={fieldClass} />
         </div>
         <div>
-          <label className="font-semibold">Salidas</label>
+          <label className="font-semibold text-[#0073a4]">Salidas</label>
           <textarea name="salidas" rows={2} className={fieldClass} />
         </div>
 
         <div>
-          <label className="font-semibold">Partes interesadas</label>
+          <label className="font-semibold text-[#0073a4]">Partes interesadas</label>
           <textarea name="partes" rows={2} className={fieldClass} />
         </div>
         <div>
-          <label className="font-semibold">Sincronización</label>
+          <label className="font-semibold text-[#0073a4]">Sincronización</label>
           <textarea name="sincronizacion" rows={2} className={fieldClass} />
         </div>
 
         <div>
-          <label className="font-semibold">RTO</label>
+          <label className="font-semibold text-[#0073a4]">RTO</label>
           <input name="rto" className={fieldClass} />
         </div>
         <div>
-          <label className="font-semibold">MTPD</label>
+          <label className="font-semibold text-[#0073a4]">MTPD</label>
           <input name="mtpd" className={fieldClass} />
         </div>
         <div>
-          <label className="font-semibold">RPO</label>
+          <label className="font-semibold text-[#0073a4]">RPO</label>
           <input name="rpo" className={fieldClass} />
         </div>
 
         <div>
-          <label className="font-semibold">Recursos</label>
+          <label className="font-semibold text-[#0073a4]">Recursos</label>
           <textarea name="recursos" rows={2} className={fieldClass} />
         </div>
         <div>
-          <label className="font-semibold">Requisitos legales</label>
+          <label className="font-semibold text-[#0073a4]">Requisitos legales</label>
           <textarea name="requisitos" rows={2} className={fieldClass} />
         </div>
 
         {/* TIPOS DE IMPACTO */}
-        <fieldset className="md:col-span-2 border rounded p-3">
-          <legend className="font-semibold">Tipos de impacto</legend>
+        <fieldset className="md:col-span-2 border rounded p-3 bg-[white]">
+          <legend className="font-semibold text-[#0073a4]">Tipos de impacto</legend>
           {errors.tiposImpacto && (
             <p className="text-sm text-red-600 mb-1">{errors.tiposImpacto}</p>
           )}
-          <div className="grid md:grid-cols-3 gap-2">
+          <div className="grid md:grid-cols-3 gap-2 ">
             {tiposImpactoCat.map((t) => (
               <label key={t} className="flex gap-2 items-center">
                 <input type="checkbox" name="tiposImpacto" value={t} />
@@ -300,7 +300,7 @@ export default function InsertarProcesoCriticoPage() {
         </fieldset>
 
         <div className="md:col-span-2">
-          <label className="font-semibold">Descripción del impacto</label>
+          <label className="font-semibold text-[#0073a4]">Descripción del impacto</label>
           <textarea name="descImpacto" rows={2} className={fieldClass} />
         </div>
 
@@ -313,7 +313,7 @@ export default function InsertarProcesoCriticoPage() {
           >
             {pending ? "Guardando..." : "Guardar"}
           </button>
-          <button type="reset" className="border px-4 py-2 rounded">
+          <button type="reset" className="bg-yellow-600 text-white px-4 py-2 rounded disabled:opacity-50">
             Limpiar
           </button>
         </div>

@@ -134,8 +134,8 @@ export default function InsertarEstrategiaPrevencionPage() {
 
       <form id="form-prevencion" className="grid grid-cols-1 md:grid-cols-2 gap-4" action={onSubmit}>
         {/* Áreas (multiselección) */}
-        <fieldset className="md:col-span-2 border rounded p-3">
-          <legend className="text-sm font-semibold">Áreas/Departamentos (puede elegir varias)</legend>
+        <fieldset className="md:col-span-2 border rounded p-3 bg-[white]">
+          <legend className="text-sm font-semibold text-[#0073a4] ">Áreas/Departamentos (puede elegir varias)</legend>
           {errors.areaIds && <p className="text-sm text-red-600 mb-1">{errors.areaIds}</p>}
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
             {areas.map((a) => (
@@ -148,12 +148,12 @@ export default function InsertarEstrategiaPrevencionPage() {
         </fieldset>
 
         {/* Proceso crítico */}
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>Nombre del Proceso Crítico</label>
           <input name="nombreProceso" className={field} placeholder="Ej.: Nómina, Ventas, Mesa de ayuda..." />
           {errors.nombreProceso && <p className="text-sm text-red-600 mt-1">{errors.nombreProceso}</p>}
         </div>
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>Descripción del Proceso Crítico</label>
           <textarea name="descripcionProceso" rows={3} className={field} />
           {errors.descripcionProceso && <p className="text-sm text-red-600 mt-1">{errors.descripcionProceso}</p>}
@@ -164,48 +164,48 @@ export default function InsertarEstrategiaPrevencionPage() {
           <h2 className="text-xl font-semibold mt-2 mb-2">Estrategia de prevención</h2>
         </div>
 
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 text-[#0073a4]">
           <label className={label}>1. Estrategias y soluciones de continuidad *</label>
           <textarea name="prev_soluciones" rows={3} className={field} />
           {errors.prev_soluciones && <p className="text-sm text-red-600 mt-1">{errors.prev_soluciones}</p>}
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>2. Asignación de recursos necesarios</label>
           <textarea name="prev_recursos" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>3. Asignación de responsabilidades</label>
           <textarea name="prev_responsabilidades" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>4. Roles o funciones de los responsables</label>
           <textarea name="prev_roles" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>5. Estructura de respuesta (alertamiento)</label>
           <textarea name="prev_estructura" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>6. Actividades a desarrollar en pruebas y simulacros</label>
           <textarea name="prev_actividades" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>7. Frecuencias de pruebas y simulacros</label>
           <input name="prev_frecuencias" className={field} placeholder="Mensual / Trimestral / Semestral / Anual..." />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>8. Resultados de las pruebas y simulacros</label>
           <textarea name="prev_resultados" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>9. Monitoreo y evaluación del desempeño</label>
           <textarea name="prev_monitoreo" rows={2} className={field} />
         </div>
@@ -213,48 +213,48 @@ export default function InsertarEstrategiaPrevencionPage() {
           <h2 className="text-xl font-semibold mt-2 mb-2">Estrategia de contingencia</h2>
         </div>
 
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 text-[#0073a4]">
           <label className={label}>1. Estrategias y soluciones de continuidad *</label>
           <textarea name="prev_soluciones" rows={3} className={field} />
           {errors.prev_soluciones && <p className="text-sm text-red-600 mt-1">{errors.prev_soluciones}</p>}
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>2. Asignación de recursos necesarios</label>
           <textarea name="prev_recursos" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>3. Asignación de responsabilidades</label>
           <textarea name="prev_responsabilidades" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>4. Roles o funciones de los responsables</label>
           <textarea name="prev_roles" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>5. Estructura de respuesta (alertamiento)</label>
           <textarea name="prev_estructura" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>6. Actividades a desarrollar en pruebas y simulacros</label>
           <textarea name="prev_actividades" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>7. Frecuencias de pruebas y simulacros</label>
           <input name="prev_frecuencias" className={field} placeholder="Mensual / Trimestral / Semestral / Anual..." />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>8. Resultados de las pruebas y simulacros</label>
           <textarea name="prev_resultados" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>9. Monitoreo y evaluación del desempeño</label>
           <textarea name="prev_monitoreo" rows={2} className={field} />
         </div>
@@ -262,48 +262,48 @@ export default function InsertarEstrategiaPrevencionPage() {
           <h2 className="text-xl font-semibold mt-2 mb-2">Estrategia de recuperación</h2>
         </div>
 
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 text-[#0073a4]">
           <label className={label}>1. Estrategias y soluciones de continuidad *</label>
           <textarea name="prev_soluciones" rows={3} className={field} />
           {errors.prev_soluciones && <p className="text-sm text-red-600 mt-1">{errors.prev_soluciones}</p>}
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>2. Asignación de recursos necesarios</label>
           <textarea name="prev_recursos" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>3. Asignación de responsabilidades</label>
           <textarea name="prev_responsabilidades" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>4. Roles o funciones de los responsables</label>
           <textarea name="prev_roles" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>5. Estructura de respuesta (alertamiento)</label>
           <textarea name="prev_estructura" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>6. Actividades a desarrollar en pruebas y simulacros</label>
           <textarea name="prev_actividades" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>7. Frecuencias de pruebas y simulacros</label>
           <input name="prev_frecuencias" className={field} placeholder="Mensual / Trimestral / Semestral / Anual..." />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>8. Resultados de las pruebas y simulacros</label>
           <textarea name="prev_resultados" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>9. Monitoreo y evaluación del desempeño</label>
           <textarea name="prev_monitoreo" rows={2} className={field} />
         </div>
@@ -311,48 +311,48 @@ export default function InsertarEstrategiaPrevencionPage() {
           <h2 className="text-xl font-semibold mt-2 mb-2">Estrategias de comunicación/divulgación</h2>
         </div>
 
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 text-[#0073a4]">
           <label className={label}>1. Estrategias y soluciones de continuidad *</label>
           <textarea name="prev_soluciones" rows={3} className={field} />
           {errors.prev_soluciones && <p className="text-sm text-red-600 mt-1">{errors.prev_soluciones}</p>}
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>2. Asignación de recursos necesarios</label>
           <textarea name="prev_recursos" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>3. Asignación de responsabilidades</label>
           <textarea name="prev_responsabilidades" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>4. Roles o funciones de los responsables</label>
           <textarea name="prev_roles" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>5. Estructura de respuesta (alertamiento)</label>
           <textarea name="prev_estructura" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>6. Actividades a desarrollar en pruebas y simulacros</label>
           <textarea name="prev_actividades" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>7. Frecuencias de pruebas y simulacros</label>
           <input name="prev_frecuencias" className={field} placeholder="Mensual / Trimestral / Semestral / Anual..." />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>8. Resultados de las pruebas y simulacros</label>
           <textarea name="prev_resultados" rows={2} className={field} />
         </div>
 
-        <div>
+        <div className="text-[#0073a4]">
           <label className={label}>9. Monitoreo y evaluación del desempeño</label>
           <textarea name="prev_monitoreo" rows={2} className={field} />
         </div>
@@ -368,7 +368,7 @@ export default function InsertarEstrategiaPrevencionPage() {
           >
             {pending ? "Guardando..." : "Guardar"}
           </button>
-          <button type="reset" className="border px-4 py-2 rounded hover:bg-gray-50">
+          <button type="reset" className="bg-yellow-600 text-white px-4 py-2 rounded disabled:opacity-50">
             Limpiar
           </button>
         </div>

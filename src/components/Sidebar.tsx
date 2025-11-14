@@ -41,9 +41,9 @@ export default function Sidebar() {
   return (
     <aside className="w-64 min-h-screen bg-[#0073a4] text-gray-200 border-r border-gray-800 flex flex-col select-none">
       {/* HEADER */}
-      <div className="px-6 py-5 border-b border-gray-800">
-        <h1 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
-          Menú
+      <div className="px-6 py-5 border-b border-white-800">
+        <h1 className="text-sm font-semibold uppercase tracking-wide text-white-400">
+          Menú - BIA
         </h1>
       </div>
 
@@ -59,7 +59,7 @@ export default function Sidebar() {
               className={`
                 flex items-center gap-3 px-6 py-2 text-sm rounded-r-full
                 hover:bg-[#1a2530] transition-colors
-                ${active ? "bg-[#1f2e3a] text-white font-medium" : "text-gray-300"}
+                ${active ? "bg-[#1f2e3a] text-white font-medium" : "text-white-300"}
               `}
             >
               {icon}
