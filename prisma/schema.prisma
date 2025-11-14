@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Prioridad {
+  Alta
+  Media
+  Baja
+}
+
+model ProcesoCritico {
+  id             String    @id @default(cuid())
+  nombre         String
+  descripcion    String
+  entradas       String    @default("")
+  salidas        String    @default("")
+  partes         String    @default("")
+  sincronizacion String    @default("")
+  rto            String    @default("")
+  mtpd           String    @default("")
+  rpo            String    @default("")
+  recursos       String    @default("")
+  requisitos     String    @default("")
+  descImpacto    String    @default("")
+  prioridad      Prioridad
+
+  areas    ProcesoArea[]
+  impactos ProcesoImpact[]
+
+  subAreas ProcesoSubarea[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Area {
+  id       String        @id // "1".."19"
+  label    String        @unique // nombre del departamento
+  usos     ProcesoArea[]
+  subAreas SubArea[] // 🔹 subáreas del departamento
+}
+
+model ImpactType {
+  id   Int             @id @default(autoincrement())
+  name String          @unique
+  usos ProcesoImpact[]
+}
+
+model ProcesoArea {
+  procesoId String
+  areaId    String
+
+  proceso ProcesoCritico @relation(fields: [procesoId], references: [id], onDelete: Cascade)
+  area    Area           @relation(fields: [areaId], references: [id], onDelete: Cascade)
+
+  @@id([procesoId, areaId])
+}
+
+model ProcesoImpact {
+  procesoId    String
+  impactTypeId Int
+
+  proceso    ProcesoCritico @relation(fields: [procesoId], references: [id], onDelete: Cascade)
+  impactType ImpactType     @relation(fields: [impactTypeId], references: [id], onDelete: Cascade)
+
+  @@id([procesoId, impactTypeId])
+}
+
+model SubArea {
+  id     String @id
+  label  String @unique
+  areaId String
+  area   Area   @relation(fields: [areaId], references: [id])
+
+  procesos ProcesoSubarea[] @relation("SubareaToProceso")
+}
+
+model ProcesoSubarea {
+  procesoId String
+  subareaId String
+
+  proceso ProcesoCritico @relation(fields: [procesoId], references: [id], onDelete: Cascade)
+
+  subarea SubArea @relation("SubareaToProceso", fields: [subareaId], references: [id], onDelete: Cascade)
+
+  @@id([procesoId, subareaId])
+}
