@@ -2,37 +2,140 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  FileText,
+  PlusCircle,
+  Workflow,
+  FolderPlus,
+  LifeBuoy,
+  BookOpen,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // Esto solo corre en el cliente, después de la hidratación
+    setMounted(true);
+  }, []);
 
   const links = [
-    { href: "/analisis-bia", label: "Mostrar Análisis BIA" },
-    { href: "/estrategias-bia", label: "Mostrar Estrategias de Continuidad" },
-    { href: "/proceso-critico", label: "Insertar Proceso Crítico" },
-    { href: "/continuidad", label: "Insertar Estrategias de Continuidad" },
+    {
+      href: "/analisis-bia",
+      label: "Mostrar Análisis BIA",
+      icon: <FileText size={18} />,
+    },
+    {
+      href: "/estrategias-bia",
+      label: "Mostrar Estrategias de Continuidad",
+      icon: <Workflow size={18} />,
+    },
+    {
+      href: "/proceso-critico",
+      label: "Insertar Proceso Crítico",
+      icon: <FolderPlus size={18} />,
+    },
+    {
+      href: "/continuidad",
+      label: "Insertar Estrategias de Continuidad",
+      icon: <PlusCircle size={18} />,
+    },
   ];
 
-  return (
-    <aside className="w-64 h-screen fixed left-0 top-0 bg-gray-900 text-white flex flex-col p-4 shadow-xl">
-      <h1 className="text-xl font-bold mb-6">Panel BIA</h1>
+  // 🔹 En servidor y en la PRIMERA render del cliente, mostramos
+  //     un sidebar estático muy simple (sin pathname, sin iconos dinámicos).
+  if (!mounted) {
+    return (
+      <aside
+        className="
+          w-64
+          min-h-screen
+          bg-[#0d1721]
+          text-gray-200
+          border-r border-gray-800
+          flex flex-col
+          select-none
+        "
+      >
+        <div className="px-6 py-5 border-b border-gray-800">
+          <h1 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
+            Menú
+          </h1>
+        </div>
 
-      <nav className="flex flex-col gap-2">
-        {links.map((link) => {
-          const active = pathname === link.href;
+        <div className="flex-1 px-6 py-4 text-xs text-gray-500">
+          Cargando menú...
+        </div>
+
+        <div className="mt-auto border-t border-gray-800 px-6 py-4 text-xs text-gray-500">
+          Cargando ayuda...
+        </div>
+      </aside>
+    );
+  }
+
+  // 🔹 Una vez montado en cliente, render normal con pathname + iconos
+  return (
+    <aside
+      className="
+        w-64
+        min-h-screen
+        bg-[#0d1721]
+        text-gray-200
+        border-r border-gray-800
+        flex flex-col
+        select-none
+      "
+    >
+      {/* HEADER */}
+      <div className="px-6 py-5 border-b border-gray-800">
+        <h1 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
+          Menú
+        </h1>
+      </div>
+
+      {/* NAV LINKS */}
+      <nav className="flex flex-col py-4 gap-1 flex-1">
+        {links.map(({ href, label, icon }) => {
+          const active = pathname === href;
+
           return (
             <Link
-              key={link.href}
-              href={link.href}
-              className={`px-3 py-2 rounded-md hover:bg-gray-700 transition-colors ${
-                active ? "bg-gray-700 font-semibold" : ""
-              }`}
+              key={href}
+              href={href}
+              className={`
+                flex items-center gap-3 px-6 py-2 text-sm rounded-r-full
+                hover:bg-[#1a2530] transition-colors
+                ${active ? "bg-[#1f2e3a] text-white font-medium" : "text-gray-300"}
+              `}
             >
-              {link.label}
+              {icon}
+              {label}
             </Link>
           );
         })}
       </nav>
+
+      {/* FOOTER */}
+      <div className="mt-auto border-t border-gray-800 px-6 py-4 flex flex-col gap-3 text-sm">
+        <Link
+          href="/soporte"
+          className="flex items-center gap-3 text-gray-300 hover:text-white transition"
+        >
+          <LifeBuoy size={18} />
+          <span>Soporte Técnico</span>
+        </Link>
+
+        <Link
+          href="/guia-usuario"
+          className="flex items-center gap-3 text-gray-300 hover:text-white transition"
+        >
+          <BookOpen size={18} />
+          <span>Guía del Usuario</span>
+        </Link>
+      </div>
     </aside>
   );
 }
