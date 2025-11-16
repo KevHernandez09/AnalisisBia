@@ -43,7 +43,7 @@ export default function LoginPage() {
             <div className="flex items-center gap-3">
               <div className="relative h-12 w-12 rounded-2xl bg-slate-900/70 border border-slate-700/70 flex items-center justify-center overflow-hidden">
                 <Image
-                  src="/logo-institucion.svg"
+                  src="/logo-institucion.png"
                   alt="Logo institucional"
                   fill
                   className="object-contain p-1.5"
@@ -51,7 +51,7 @@ export default function LoginPage() {
               </div>
               <div>
                 <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">
-                  Sistema de Continuidad
+                  Sistema- PCSAL
                 </p>
                 <h1 className="text-2xl font-semibold leading-tight">
                   Gestión de Procesos Críticos
@@ -82,7 +82,7 @@ export default function LoginPage() {
                 <span className="h-8 w-8 rounded-xl border border-slate-500/70 flex items-center justify-center text-xs">
                   3
                 </span>
-                <span>Mantén trazabilidad para auditorías y mejoras continuas.</span>
+                <span>Consulta el análisis BIA.</span>
               </div>
             </div>
           </div>

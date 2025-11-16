@@ -101,6 +101,10 @@ export default function AnalisisBIA() {
   return (
     <section className="text-black">
       <h1 className="text-3xl font-bold mb-6">Mostrar Análisis BIA</h1>
+      <p className="text-sm text-gray-600 mb-4">
+        Departamento: {selected ? selectedLabel : "Ninguno"} — Registros:{" "}
+        {rows.length}
+      </p>
 
       {/* Combobox */}
       <div className="relative max-w-xl mb-6" ref={dropdownRef}>

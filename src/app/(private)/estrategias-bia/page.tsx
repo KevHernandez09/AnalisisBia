@@ -177,9 +177,8 @@ export default function EstrategiasContinuidadPage() {
               filtered.map((op) => (
                 <div
                   key={op.id}
-                  className={`p-2 cursor-pointer hover:bg-gray-200 ${
-                    selected === op.id ? "bg-gray-100 font-semibold" : ""
-                  }`}
+                  className={`p-2 cursor-pointer hover:bg-gray-200 ${selected === op.id ? "bg-gray-100 font-semibold" : ""
+                    }`}
                   onClick={() => {
                     setSelected(op.id);
                     setOpen(false);
