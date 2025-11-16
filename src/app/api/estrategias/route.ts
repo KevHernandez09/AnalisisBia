@@ -4,15 +4,9 @@ import { prisma } from "../../../../lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-// === Zod para el POST ===
-const BodySchema = z.object({
-  areaIds: z.array(z.string()).min(1, "Seleccione al menos un área/gerencia"),
-
-  nombreProceso: z.string().min(2, "Ingrese el nombre del proceso crítico"),
-  descripcionProceso: z.string().min(5, "Describa el proceso crítico"),
-
-  tipo: z.string().min(1, "Tipo de estrategia requerido"), // "Estrategias de prevención", etc.
-
+// Para el POST: estructura de cada estrategia
+const EstrategiaBaseSchema = z.object({
+  tipo: z.string().min(3),
   soluciones: z.string().min(3, "Describa las estrategias y soluciones"),
   recursos: z.string().optional().default(""),
   responsabilidades: z.string().optional().default(""),
@@ -24,22 +18,40 @@ const BodySchema = z.object({
   monitoreo: z.string().optional().default(""),
 });
 
-// ====== POST: crear estrategia ======
+// Cuerpo completo del POST
+const BodySchema = z.object({
+  areaIds: z.array(z.string()).min(1, "Seleccione al menos un área/gerencia"),
+  nombreProceso: z.string().min(2, "Ingrese el nombre del proceso crítico"),
+  descripcionProceso: z.string().min(5, "Describa el proceso crítico"),
+  estrategias: z
+    .array(EstrategiaBaseSchema)
+    .min(1, "Debe enviar al menos una estrategia"),
+});
+
+// Tipo de respuesta para la tabla
+type StrategyRow = {
+  proceso: string;
+  descripcion: string;
+  tipo: string;
+  soluciones: string;
+  recursos: string;
+  responsabilidades: string;
+  roles: string;
+  estructura: string;
+  actividades: string;
+  frecuencias: string;
+  resultados: string;
+  monitoreo: string;
+};
+
+// ============ POST: crear las 4 estrategias ============
+
 export async function POST(req: Request) {
   try {
     const raw = await req.json();
-    const parsed = BodySchema.safeParse(raw);
+    const data = BodySchema.parse(raw);
 
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: parsed.error.flatten() },
-        { status: 400 },
-      );
-    }
-
-    const data = parsed.data;
-
-    // 1) Validar que las áreas existan
+    // 1) Validar áreas
     const areasDb = await prisma.area.findMany({
       where: { id: { in: data.areaIds } },
       select: { id: true },
@@ -56,38 +68,48 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2) Transacción: crear estrategia + join con áreas
-    const created = await prisma.$transaction(async (tx) => {
-      const estrategia = await tx.estrategia.create({
-        data: {
-          nombreProceso: data.nombreProceso,
-          descripcionProceso: data.descripcionProceso,
-          tipo: data.tipo,
-          soluciones: data.soluciones,
-          recursos: data.recursos ?? "",
-          responsabilidades: data.responsabilidades ?? "",
-          roles: data.roles ?? "",
-          estructura: data.estructura ?? "",
-          actividades: data.actividades ?? "",
-          frecuencias: data.frecuencias ?? "",
-          resultados: data.resultados ?? "",
-          monitoreo: data.monitoreo ?? "",
-        },
-      });
+    // 2) Transacción: crear una Estrategia por cada item en `estrategias`
+    const creadas = await prisma.$transaction(async (tx) => {
+      const createdEstrats = [];
 
-      await tx.estrategiaArea.createMany({
-        data: data.areaIds.map((areaId) => ({
-          estrategiaId: estrategia.id,
-          areaId,
-        })),
-        skipDuplicates: true,
-      });
+      for (const e of data.estrategias) {
+        const estrategia = await tx.estrategia.create({
+          data: {
+            nombreProceso: data.nombreProceso,
+            descripcionProceso: data.descripcionProceso,
+            tipo: e.tipo,
+            soluciones: e.soluciones,
+            recursos: e.recursos ?? "",
+            responsabilidades: e.responsabilidades ?? "",
+            roles: e.roles ?? "",
+            estructura: e.estructura ?? "",
+            actividades: e.actividades ?? "",
+            frecuencias: e.frecuencias ?? "",
+            resultados: e.resultados ?? "",
+            monitoreo: e.monitoreo ?? "",
+          },
+        });
 
-      return estrategia;
+        await tx.estrategiaArea.createMany({
+          data: data.areaIds.map((areaId) => ({
+            estrategiaId: estrategia.id,
+            areaId,
+          })),
+          skipDuplicates: true,
+        });
+
+        createdEstrats.push(estrategia);
+      }
+
+      return createdEstrats;
     });
 
     return NextResponse.json(
-      { ok: true, id: created.id },
+      {
+        ok: true,
+        count: creadas.length,
+        ids: creadas.map((e) => e.id),
+      },
       { status: 201 },
     );
   } catch (err: any) {
@@ -98,27 +120,13 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json(
-      { error: "Error al guardar la estrategia" },
+      { error: "Error al guardar las estrategias" },
       { status: 500 },
     );
   }
 }
 
-// ====== GET: obtener estrategias por departamento (areaId) ======
-type StrategyRow = {
-  proceso: string;
-  descripcion: string;
-  tipo: string;
-  soluciones: string;
-  recursos: string;
-  responsabilidades: string;
-  roles: string;
-  estructura: string;
-  actividades: string;
-  frecuencias: string;
-  resultados: string;
-  monitoreo: string;
-};
+// ============ GET: listar estrategias por areaId para la tabla ============
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -126,7 +134,7 @@ export async function GET(req: Request) {
 
   if (!areaId) {
     return NextResponse.json(
-      { error: "Falta el parámetro areaId" },
+      { error: "Falta parámetro areaId" },
       { status: 400 },
     );
   }
@@ -152,7 +160,9 @@ export async function GET(req: Request) {
         resultados: true,
         monitoreo: true,
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: {
+        createdAt: "asc",
+      },
     });
 
     const rows: StrategyRow[] = estrategias.map((e) => ({

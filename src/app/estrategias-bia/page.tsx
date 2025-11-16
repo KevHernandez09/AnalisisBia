@@ -17,11 +17,22 @@ type StrategyRow = {
   monitoreo: string;
 };
 
+type GroupedProcess = {
+  key: string;
+  proceso: string;
+  descripcion: string;
+  estrategias: StrategyRow[];
+};
+
 export default function EstrategiasContinuidadPage() {
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState("");
+  const [selected, setSelected] = useState(""); // areaId
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  const [rows, setRows] = useState<StrategyRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
 
   const opciones = [
     { id: "2", label: "Gerencia General" },
@@ -45,15 +56,20 @@ export default function EstrategiasContinuidadPage() {
   ];
 
   const filtered = opciones.filter((op) =>
-    op.label.toLowerCase().includes(search.toLowerCase())
+    op.label.toLowerCase().includes(search.toLowerCase()),
   );
 
   const selectedLabel =
-    opciones.find((i) => i.id === selected)?.label || "Seleccione un proceso...";
+    opciones.find((i) => i.id === selected)?.label ||
+    "Seleccione un departamento...";
 
+  // Cerrar dropdown al hacer clic fuera
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
         setSearch("");
       }
@@ -62,123 +78,80 @@ export default function EstrategiasContinuidadPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // === Datos de ejemplo (reemplazar con fetch a tu API) ===
-  const dataByDept: Record<string, StrategyRow[]> = {
-    "2": [
-      {
-        proceso: "Gestión de Recursos Humanos",
-        descripcion:
-          "Coordina la respuesta institucional ante incidentes que afecten personal y operaciones.",
-        tipo: "Estrategias de prevención",
-        soluciones: "Capacitaciones y políticas de continuidad.",
-        recursos: "Presupuesto anual; LMS.",
-        responsabilidades: "Dirección RRHH; Jefaturas.",
-        roles: "Líder de continuidad; supervisores.",
-        estructura: "Alerta por correo y Teams.",
-        actividades: "Simulacros trimestrales.",
-        frecuencias: "Trimestral",
-        resultados: "RTO cumplido en 80% de pruebas.",
-        monitoreo: "KPIs y lecciones aprendidas.",
-      },
-      {
-        proceso: "Gestión de Recursos Humanos",
-        descripcion:
-          "Coordina la respuesta institucional ante incidentes que afecten personal y operaciones.",
-        tipo: "Estrategias de recuperación",
-        soluciones: "Plan de reincorporación y reubicación temporal.",
-        recursos: "Mesa de ayuda; herramientas de ticketing.",
-        responsabilidades: "RRHH + TI.",
-        roles: "Coordinador de reincorporación.",
-        estructura: "Escalamiento a CIE en 30 min.",
-        actividades: "Pruebas de acceso remoto.",
-        frecuencias: "Semestral",
-        resultados: "90% de reincorporación < 48h.",
-        monitoreo: "Reportes post-incidente.",
-      },
-      {
-        proceso: "Gestión de Activos TI",
-        descripcion: "Asegura disponibilidad de servicios críticos de TI.",
-        tipo: "Estrategias de contingencia",
-        soluciones: "Failover a región secundaria.",
-        recursos: "Infraestructura en alta disponibilidad.",
-        responsabilidades: "Área de TI.",
-        roles: "On-call; SRE.",
-        estructura: "PagerDuty; runbooks.",
-        actividades: "GameDays; DR test.",
-        frecuencias: "Anual",
-        resultados: "RPO < 4h alcanzado.",
-        monitoreo: "Dashboards y alertas.",
-      },
-    ],
-  };
-
-  const all = dataByDept[selected] ?? [];
-
-  // Orden de prioridad de tipo de estrategia
-  const tipoOrder: Record<string, number> = {
-    "Estrategias de prevención": 1,
-    "Estrategias de contingencia": 2,
-    "Estrategias de recuperación": 3,
-    "Estrategias de comunicación/divulgación": 4,
-  };
-
-  // Pivot: una fila por proceso crítico
-  const aggregated = useMemo(() => {
-    type Agg = {
-      key: string;
-      proceso: string;
-      descripcion: string;
-      prev?: StrategyRow;
-      cont?: StrategyRow;
-      rec?: StrategyRow;
-      com?: StrategyRow;
-      base?: StrategyRow;
-    };
-
-    const map = new Map<string, Agg>();
-
-    for (const r of all) {
-      const key = `${r.proceso}|||${r.descripcion}`;
-      let item = map.get(key);
-      if (!item) {
-        item = { key, proceso: r.proceso, descripcion: r.descripcion };
-        map.set(key, item);
+  // Fetch real a /api/estrategias
+  useEffect(() => {
+    async function load() {
+      if (!selected) {
+        setRows([]);
+        return;
       }
 
-      switch (r.tipo) {
-        case "Estrategias de prevención":
-          item.prev = r;
-          break;
-        case "Estrategias de contingencia":
-          item.cont = r;
-          break;
-        case "Estrategias de recuperación":
-          item.rec = r;
-          break;
-        case "Estrategias de comunicación/divulgación":
-          item.com = r;
-          break;
-      }
+      try {
+        setLoading(true);
+        setErr(null);
 
-      // Estrategia base para columnas genéricas (la de mayor prioridad)
-      if (!item.base) {
-        item.base = r;
-      } else {
-        const current = item.base;
-        const currentOrder = tipoOrder[current.tipo] ?? 999;
-        const newOrder = tipoOrder[r.tipo] ?? 999;
-        if (newOrder < currentOrder) {
-          item.base = r;
+        const r = await fetch(
+          `/api/estrategias?areaId=${encodeURIComponent(selected)}`,
+          { cache: "no-store" },
+        );
+        if (!r.ok) {
+          const j = await r.json().catch(() => ({}));
+          throw new Error(j?.error || "Error al consultar estrategias");
         }
+
+        const j = (await r.json()) as { rows: StrategyRow[] };
+        setRows(j.rows || []);
+      } catch (e: any) {
+        setErr(e?.message ?? "Error inesperado");
+        setRows([]);
+      } finally {
+        setLoading(false);
       }
     }
 
-    return Array.from(map.values());
-  }, [all]);
+    load();
+  }, [selected]);
+
+  // Orden para tipo de estrategia (para que salgan en el orden de la plantilla)
+  const tipoOrder = (tipo: string): number => {
+    const t = tipo.toLowerCase();
+    if (t.includes("prev")) return 1; // prevención
+    if (t.includes("conting")) return 2; // contingencia
+    if (t.includes("recup")) return 3; // recuperación
+    if (t.includes("comun") || t.includes("divulg")) return 4; // comunicación/divulgación
+    return 999;
+  };
+
+  // Agrupar por proceso y ordenar las estrategias por tipo
+  const grouped = useMemo<GroupedProcess[]>(() => {
+    const map = new Map<string, GroupedProcess>();
+
+    for (const r of rows) {
+      const key = `${r.proceso}|||${r.descripcion}`;
+      let g = map.get(key);
+      if (!g) {
+        g = { key, proceso: r.proceso, descripcion: r.descripcion, estrategias: [] };
+        map.set(key, g);
+      }
+      g.estrategias.push(r);
+    }
+
+    return Array.from(map.values()).map((g) => ({
+      ...g,
+      estrategias: g.estrategias.sort(
+        (a, b) => tipoOrder(a.tipo) - tipoOrder(b.tipo),
+      ),
+    }));
+  }, [rows]);
 
   return (
     <section className="text-black px-6 pt-6">
-      <h1 className="text-3xl font-bold mb-6">Estrategias de Continuidad</h1>
+      <h1 className="text-3xl font-bold mb-2">Estrategias de Continuidad</h1>
+
+      <p className="text-sm text-gray-600 mb-4">
+        Departamento: {selected ? selectedLabel : "Ninguno"} — Registros:{" "}
+        {rows.length}
+      </p>
 
       {/* Combobox */}
       <div className="relative w-full max-w-lg mb-6" ref={dropdownRef}>
@@ -223,10 +196,19 @@ export default function EstrategiasContinuidadPage() {
         )}
       </div>
 
-      {/* Tabla adaptada a la plantilla */}
+      {err && (
+        <div className="mb-4 rounded bg-red-50 border border-red-300 text-red-700 px-3 py-2">
+          {err}
+        </div>
+      )}
+      {loading && (
+        <p className="mb-3 text-gray-600">Cargando estrategias…</p>
+      )}
+
+      {/* Tabla con 4 filas por proceso, como en la plantilla */}
       <div className="mt-4 bg-[#0073a4] border rounded shadow-sm">
         <div className="w-full overflow-x-auto">
-          <table className="min-w-[1800px] border-collapse">
+          <table className="min-w-[1600px] border-collapse">
             <thead>
               <tr className="bg-[#0073a4]-200 text-white text-[13px]">
                 <th className="border px-2 py-2 text-left">
@@ -236,16 +218,7 @@ export default function EstrategiasContinuidadPage() {
                   Descripción del Proceso Crítico
                 </th>
                 <th className="border px-2 py-2 text-left">
-                  Estrategias de prevención
-                </th>
-                <th className="border px-2 py-2 text-left">
-                  Estrategias de contingencia
-                </th>
-                <th className="border px-2 py-2 text-left">
-                  Estrategias de recuperación
-                </th>
-                <th className="border px-2 py-2 text-left">
-                  Estrategias de comunicación/divulgación
+                  Tipo de estrategia
                 </th>
                 <th className="border px-2 py-2 text-left">
                   Estrategias y soluciones de continuidad
@@ -272,74 +245,71 @@ export default function EstrategiasContinuidadPage() {
             </thead>
 
             <tbody className="text-[13px]">
-              {aggregated.length > 0 ? (
-                aggregated.map((row) => {
-                  const base = row.base;
-                  const solucionesContinuidad = [
-                    row.prev?.soluciones,
-                    row.cont?.soluciones,
-                    row.rec?.soluciones,
-                    row.com?.soluciones,
-                  ]
-                    .filter(Boolean)
-                    .join("\n");
+              {grouped.length > 0 ? (
+                grouped.map((g) => {
+                  const estrategias = g.estrategias;
+                  const rowSpan = estrategias.length || 1;
 
-                  return (
+                  return estrategias.map((e, idx) => (
                     <tr
-                      key={row.key}
+                      key={`${g.key}-${idx}`}
                       className="odd:bg-white even:bg-gray-50 align-top"
                     >
-                      <td className="border px-2 py-2">{row.proceso}</td>
-                      <td className="border px-2 py-2">{row.descripcion}</td>
+                      {/* Solo en la primera fila mostramos nombre y descripción con rowSpan */}
+                      {idx === 0 && (
+                        <>
+                          <td
+                            className="border px-2 py-2"
+                            rowSpan={rowSpan}
+                          >
+                            {g.proceso}
+                          </td>
+                          <td
+                            className="border px-2 py-2"
+                            rowSpan={rowSpan}
+                          >
+                            {g.descripcion}
+                          </td>
+                        </>
+                      )}
 
-                      {/* Estrategias por tipo */}
+                      {/* Tipo de estrategia en cada fila */}
                       <td className="border px-2 py-2 whitespace-pre-line">
-                        {row.prev?.soluciones}
+                        {e.tipo}
                       </td>
                       <td className="border px-2 py-2 whitespace-pre-line">
-                        {row.cont?.soluciones}
+                        {e.soluciones}
                       </td>
                       <td className="border px-2 py-2 whitespace-pre-line">
-                        {row.rec?.soluciones}
+                        {e.recursos}
                       </td>
                       <td className="border px-2 py-2 whitespace-pre-line">
-                        {row.com?.soluciones}
-                      </td>
-
-                      {/* Estrategias y soluciones de continuidad (todas juntas) */}
-                      <td className="border px-2 py-2 whitespace-pre-line">
-                        {solucionesContinuidad}
-                      </td>
-
-                      {/* Columnas generales (toman la estrategia base) */}
-                      <td className="border px-2 py-2 whitespace-pre-line">
-                        {base?.recursos}
+                        {e.responsabilidades}
                       </td>
                       <td className="border px-2 py-2 whitespace-pre-line">
-                        {base?.responsabilidades}
+                        {e.roles}
                       </td>
                       <td className="border px-2 py-2 whitespace-pre-line">
-                        {base?.roles}
+                        {e.estructura}
                       </td>
                       <td className="border px-2 py-2 whitespace-pre-line">
-                        {base?.estructura}
+                        {e.actividades}
                       </td>
                       <td className="border px-2 py-2 whitespace-pre-line">
-                        {base?.actividades}
-                      </td>
-                      <td className="border px-2 py-2 whitespace-pre-line">
-                        {base?.frecuencias}
+                        {e.frecuencias}
                       </td>
                     </tr>
-                  );
+                  ));
                 })
               ) : (
                 <tr>
                   <td
-                    colSpan={15}
+                    colSpan={10}
                     className="border px-4 py-6 text-center text-gray-500 italic bg-gray-50"
                   >
-                    No hay estrategias registradas para este departamento.
+                    {selected
+                      ? "No hay estrategias registradas para este departamento."
+                      : "Seleccione un departamento para ver estrategias."}
                   </td>
                 </tr>
               )}
