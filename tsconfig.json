@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-, "src/app/proceso-critico", "prisma/seed.cjs", "prisma/seed.cjs"  ],
+, "src/app/private/proceso-critico", "prisma/seed.cjs", "prisma/seed.cjs"  ],
   "exclude": ["node_modules"]
 }
