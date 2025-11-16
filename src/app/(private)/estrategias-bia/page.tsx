@@ -46,7 +46,7 @@ export default function EstrategiasContinuidadPage() {
     { id: "10", label: "Departamento de Instituto de Formación e Investigación" },
     { id: "11", label: "Departamento Análisis Presupuestario" },
     { id: "12", label: "Departamento de Comisiones Legislativas" },
-    { id: "13", label: "Departamento de __________________" },
+    { id: "13", label: "Gerencia Administrativa" },
     { id: "14", label: "Departamento de Financiero" },
     { id: "15", label: "Departamento de Servicios Generales" },
     { id: "16", label: "Departamento de Proveeduría" },
@@ -153,44 +153,77 @@ export default function EstrategiasContinuidadPage() {
         {rows.length}
       </p>
 
-      {/* Combobox */}
+      {/* 🔥 Combobox Moderno */}
       <div className="relative w-full max-w-lg mb-6" ref={dropdownRef}>
-        <div
-          className="border border-gray-400 p-3 rounded bg-white cursor-pointer shadow-sm hover:border-gray-500 transition"
+        <button
+          type="button"
           onClick={() => setOpen((prev) => !prev)}
+          className="
+            w-full flex items-center justify-between
+            px-4 py-3 rounded-xl bg-white border border-gray-300 shadow-sm
+            hover:border-[#0073a4] focus:border-[#0073a4]
+            focus:ring-2 focus:ring-[#0073a4]/30 transition-all
+            text-left text-[15px] font-medium text-gray-700
+          "
         >
-          {selectedLabel}
-        </div>
+          <span>{selectedLabel}</span>
+          <svg
+            className={`w-5 h-5 text-gray-500 transition-transform ${open ? "rotate-180" : "rotate-0"
+              }`}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
 
         {open && (
-          <div className="absolute left-0 right-0 border border-gray-300 bg-white rounded mt-1 w-full max-h-64 overflow-y-auto shadow-lg z-50">
-            <input
-              type="text"
-              placeholder="Buscar..."
-              className="w-full border-b p-2 outline-none text-black"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onClick={(e) => e.stopPropagation()}
-            />
+          <div className="absolute left-0 right-0 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-xl max-h-64 overflow-hidden z-50">
+            <div className="p-2 border-b border-gray-200">
+              <input
+                type="text"
+                placeholder="Buscar departamento..."
+                className="
+                  w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-300
+                  text-gray-700 text-sm outline-none
+                  focus:border-[#0073a4] focus:ring-2 focus:ring-[#0073a4]/30
+                  transition-all
+                "
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
 
-            {filtered.length > 0 ? (
-              filtered.map((op) => (
-                <div
-                  key={op.id}
-                  className={`p-2 cursor-pointer hover:bg-gray-200 ${selected === op.id ? "bg-gray-100 font-semibold" : ""
-                    }`}
-                  onClick={() => {
-                    setSelected(op.id);
-                    setOpen(false);
-                    setSearch("");
-                  }}
-                >
-                  {op.label}
+            <div className="max-h-56 overflow-y-auto">
+              {filtered.length > 0 ? (
+                filtered.map((op) => (
+                  <div
+                    key={op.id}
+                    className={`
+                      px-4 py-2.5 cursor-pointer text-sm transition-all
+                      ${selected === op.id
+                        ? "bg-[#0073a4]/10 text-[#0073a4] font-semibold"
+                        : "hover:bg-gray-100"
+                      }
+                    `}
+                    onClick={() => {
+                      setSelected(op.id);
+                      setOpen(false);
+                      setSearch("");
+                    }}
+                  >
+                    {op.label}
+                  </div>
+                ))
+              ) : (
+                <div className="px-4 py-3 text-gray-500 text-sm">
+                  No hay coincidencias
                 </div>
-              ))
-            ) : (
-              <div className="p-2 text-gray-600">No hay coincidencias</div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -200,6 +233,7 @@ export default function EstrategiasContinuidadPage() {
           {err}
         </div>
       )}
+
       {loading && (
         <p className="mb-3 text-gray-600">Cargando estrategias…</p>
       )}
@@ -209,7 +243,7 @@ export default function EstrategiasContinuidadPage() {
         <div className="w-full overflow-x-auto">
           <table className="min-w-[1600px] border-collapse">
             <thead>
-              <tr className="bg-[#0073a4]-200 text-white text-[13px]">
+              <tr className="bg-[#0073a4] text-white text-[13px]">
                 <th className="border px-2 py-2 text-left">
                   Nombre del Proceso Crítico
                 </th>
@@ -254,7 +288,6 @@ export default function EstrategiasContinuidadPage() {
                       key={`${g.key}-${idx}`}
                       className="odd:bg-white even:bg-gray-50 align-top"
                     >
-                      {/* Solo en la primera fila mostramos nombre y descripción con rowSpan */}
                       {idx === 0 && (
                         <>
                           <td
@@ -272,7 +305,6 @@ export default function EstrategiasContinuidadPage() {
                         </>
                       )}
 
-                      {/* Tipo de estrategia en cada fila */}
                       <td className="border px-2 py-2 whitespace-pre-line">
                         {e.tipo}
                       </td>

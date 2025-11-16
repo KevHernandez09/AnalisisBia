@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 type BiaRow = {
-  area: string;          // Nombre(s) de subáreas o área asociada
+  area: string;
   nombre: string;
   descripcion: string;
   entradas: string;
@@ -15,18 +15,19 @@ type BiaRow = {
   rpo: string;
   recursos: string;
   requisitos: string;
-  tipoImpacto: string;   // Impactos concatenados
+  tipoImpacto: string;
   descImpacto: string;
   prioridad: string;
 };
 
 export default function AnalisisBIA() {
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState(""); // departamentoId
+  const [selected, setSelected] = useState("");
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<BiaRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   const opciones = [
@@ -53,10 +54,12 @@ export default function AnalisisBIA() {
   const filtered = opciones.filter((op) =>
     op.label.toLowerCase().includes(search.toLowerCase())
   );
-  const selectedLabel =
-    opciones.find((i) => i.id === selected)?.label || "Seleccione un departamento...";
 
-  // Cerrar dropdown al hacer clic fuera
+  const selectedLabel =
+    opciones.find((i) => i.id === selected)?.label ||
+    "Seleccione un departamento...";
+
+  // cerrar dropdown en click outside
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -68,7 +71,7 @@ export default function AnalisisBIA() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fetch a la API cada vez que cambia el departamento seleccionado
+  // fetch por departamento seleccionado
   useEffect(() => {
     async function load() {
       if (!selected) {
@@ -78,14 +81,17 @@ export default function AnalisisBIA() {
       try {
         setLoading(true);
         setErr(null);
+
         const r = await fetch(
           `/api/bia?departamentoId=${encodeURIComponent(selected)}`,
           { cache: "no-store" }
         );
+
         if (!r.ok) {
           const j = await r.json().catch(() => ({}));
           throw new Error(j?.error || "Error al consultar");
         }
+
         const j = (await r.json()) as { rows: BiaRow[] };
         setRows(j.rows || []);
       } catch (e: any) {
@@ -95,55 +101,96 @@ export default function AnalisisBIA() {
         setLoading(false);
       }
     }
+
     load();
   }, [selected]);
 
   return (
     <section className="text-black">
       <h1 className="text-3xl font-bold mb-6">Mostrar Análisis BIA</h1>
+
       <p className="text-sm text-gray-600 mb-4">
-        Departamento: {selected ? selectedLabel : "Ninguno"} — Registros:{" "}
-        {rows.length}
+        Departamento: {selected ? selectedLabel : "Ninguno"} — Registros: {rows.length}
       </p>
 
-      {/* Combobox */}
+      {/* Combobox Moderno */}
       <div className="relative max-w-xl mb-6" ref={dropdownRef}>
-        <div
-          className="border border-gray-300 p-3 rounded cursor-pointer bg-white"
-          onClick={() => setOpen((prev) => !prev)}
+        <button
+          type="button"
+          onClick={() => setOpen((p) => !p)}
+          className="
+            w-full flex items-center justify-between
+            px-4 py-3 rounded-xl bg-white border border-gray-300 shadow-sm
+            hover:border-[#0073a4] focus:border-[#0073a4]
+            focus:ring-2 focus:ring-[#0073a4]/30 transition-all
+            text-left text-[15px] font-medium text-gray-700
+          "
         >
-          {selectedLabel}
-        </div>
+          <span>{selectedLabel}</span>
+
+          <svg
+            className={`w-5 h-5 text-gray-500 transition-transform ${
+              open ? "rotate-180" : "rotate-0"
+            }`}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
 
         {open && (
-          <div className="absolute border border-gray-300 bg-white rounded mt-1 w-full max-h-64 overflow-y-auto shadow-xl z-10">
-            <input
-              type="text"
-              placeholder="Buscar..."
-              className="w-full border-b p-2 outline-none text-black"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onClick={(e) => e.stopPropagation()}
-            />
-            {filtered.length > 0 ? (
-              filtered.map((op) => (
-                <div
-                  key={op.id}
-                  className={`p-2 cursor-pointer hover:bg-gray-200 ${
-                    selected === op.id ? "bg-gray-100 font-semibold" : ""
-                  }`}
-                  onClick={() => {
-                    setSelected(op.id);
-                    setOpen(false);
-                    setSearch("");
-                  }}
-                >
-                  {op.label}
+          <div
+            className="
+              absolute mt-2 w-full bg-white border border-gray-200
+              rounded-xl shadow-xl z-10 max-h-64 overflow-hidden
+            "
+          >
+            <div className="p-2 border-b border-gray-200">
+              <input
+                type="text"
+                placeholder="Buscar departamento..."
+                value={search}
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => setSearch(e.target.value)}
+                className="
+                  w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-300
+                  text-gray-700 text-sm transition-all outline-none
+                  focus:border-[#0073a4] focus:ring-2 focus:ring-[#0073a4]/30
+                "
+              />
+            </div>
+
+            <div className="max-h-56 overflow-y-auto">
+              {filtered.length > 0 ? (
+                filtered.map((op) => (
+                  <div
+                    key={op.id}
+                    className={`
+                      px-4 py-2.5 cursor-pointer text-sm transition-all
+                      ${
+                        selected === op.id
+                          ? "bg-[#0073a4]/10 text-[#0073a4] font-semibold"
+                          : "hover:bg-gray-100"
+                      }
+                    `}
+                    onClick={() => {
+                      setSelected(op.id);
+                      setOpen(false);
+                      setSearch("");
+                    }}
+                  >
+                    {op.label}
+                  </div>
+                ))
+              ) : (
+                <div className="px-4 py-3 text-gray-500 text-sm">
+                  No hay coincidencias
                 </div>
-              ))
-            ) : (
-              <div className="p-2 text-gray-600">No hay coincidencias</div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -153,9 +200,12 @@ export default function AnalisisBIA() {
           {err}
         </div>
       )}
-      {loading && <p className="mb-3 text-gray-600">Cargando…</p>}
 
-      {/* Tabla */}
+      {loading && (
+        <p className="mb-3 text-gray-600">Cargando…</p>
+      )}
+
+      {/* TABLA */}
       <div className="w-full overflow-x-auto border rounded">
         <table className="min-w-[1200px] w-full border-collapse">
           <thead>
@@ -163,39 +213,26 @@ export default function AnalisisBIA() {
               <th className="border px-2 py-2 text-left">
                 Área de la Gerencia o Departamento
               </th>
-              <th className="border px-2 py-2 text-left">Nombre del Proceso Crítico</th>
               <th className="border px-2 py-2 text-left">
-                Descripción del Proceso Crítico
+                Nombre del Proceso Crítico
               </th>
               <th className="border px-2 py-2 text-left">
-                Entradas del Proceso Crítico
+                Descripción
               </th>
-              <th className="border px-2 py-2 text-left">
-                Salidas del Proceso Crítico
-              </th>
-              <th className="border px-2 py-2 text-left">
-                Partes interesadas (usuarios)
-              </th>
-              <th className="border px-2 py-2 text-left">
-                Sincronización con otros Procesos
-              </th>
+              <th className="border px-2 py-2 text-left">Entradas</th>
+              <th className="border px-2 py-2 text-left">Salidas</th>
+              <th className="border px-2 py-2 text-left">Partes interesadas</th>
+              <th className="border px-2 py-2 text-left">Sincronización</th>
               <th className="border px-2 py-2 text-center" colSpan={3}>
                 Marco de tiempo de recuperación
               </th>
-              <th className="border px-2 py-2 text-left">
-                Recursos Necesarios
-              </th>
-              <th className="border px-2 py-2 text-left">
-                Requisitos Legales y Normativos
-              </th>
-              <th className="border px-2 py-2 text-left">Tipo de impacto</th>
-              <th className="border px-2 py-2 text-left">
-                Descripción del impacto
-              </th>
-              <th className="border px-2 py-2 text-left">
-                Prioridad de recuperación
-              </th>
+              <th className="border px-2 py-2 text-left">Recursos</th>
+              <th className="border px-2 py-2 text-left">Requisitos</th>
+              <th className="border px-2 py-2 text-left">Tipo impacto</th>
+              <th className="border px-2 py-2 text-left">Descripción impacto</th>
+              <th className="border px-2 py-2 text-left">Prioridad</th>
             </tr>
+
             <tr className="bg-[#0073a4] text-white text-[12px]">
               {Array.from({ length: 7 }).map((_, i) => (
                 <th key={i} className="border px-2 py-1"></th>
@@ -211,8 +248,8 @@ export default function AnalisisBIA() {
 
           <tbody className="text-[13px]">
             {rows.length > 0 ? (
-              rows.map((r, idx) => (
-                <tr key={`row-${idx}`} className="odd:bg-white even:bg-gray-50">
+              rows.map((r, index) => (
+                <tr key={index} className="odd:bg-white even:bg-gray-50">
                   <td className="border px-2 py-2">{r.area}</td>
                   <td className="border px-2 py-2">{r.nombre}</td>
                   <td className="border px-2 py-2">{r.descripcion}</td>
