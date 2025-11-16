@@ -39,10 +39,11 @@ model ProcesoCritico {
 }
 
 model Area {
-  id       String        @id // "1".."19"
-  label    String        @unique // nombre del departamento
-  usos     ProcesoArea[]
-  subAreas SubArea[] // 🔹 subáreas del departamento
+  id          String           @id // "1".."19"
+  label       String           @unique // nombre del departamento
+  usos        ProcesoArea[]
+  subAreas    SubArea[] // 🔹 subáreas del departamento
+  estrategias EstrategiaArea[]
 }
 
 model ImpactType {
@@ -89,4 +90,39 @@ model ProcesoSubarea {
   subarea SubArea @relation("SubareaToProceso", fields: [subareaId], references: [id], onDelete: Cascade)
 
   @@id([procesoId, subareaId])
+}
+
+model Estrategia {
+  id String @id @default(cuid())
+
+  // Lo que viene del formulario:
+  nombreProceso      String
+  descripcionProceso String
+  tipo               String // ej.: "Estrategias de prevención"
+
+  soluciones        String
+  recursos          String @default("")
+  responsabilidades String @default("")
+  roles             String @default("")
+  estructura        String @default("")
+  actividades       String @default("")
+  frecuencias       String @default("")
+  resultados        String @default("")
+  monitoreo         String @default("")
+
+  // Relación N:M con Area (departamentos del combo)
+  areas EstrategiaArea[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EstrategiaArea {
+  estrategiaId String
+  areaId       String
+
+  estrategia Estrategia @relation(fields: [estrategiaId], references: [id], onDelete: Cascade)
+  area       Area       @relation(fields: [areaId], references: [id], onDelete: Cascade)
+
+  @@id([estrategiaId, areaId])
 }
