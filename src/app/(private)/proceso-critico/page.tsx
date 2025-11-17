@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 
 /**
@@ -26,6 +26,9 @@ const departamentos = [
   { id: "17", label: "Departamento de Recursos Humanos" },
   { id: "18", label: "Departamento de Servicios de Salud" },
   { id: "19", label: "Comité Institucional de Emergencias" },
+  { id: "20", label: "Departamento de Secretaria del Directorio" },
+  { id: "21", label: "Departamento de Servicios Parlamentarios" },
+  { id: "22", label: "Departamento de Servicios Técnicos" },
 ];
 
 // === SUBÁREAS ===
@@ -34,7 +37,6 @@ const subAreas = [
   { id: "planilla-diputados", label: "Área de planilla de diputados", areaId: "14" },
   { id: "presupuesto", label: "Área de presupuesto", areaId: "14" },
   { id: "contabilidad", label: "Área de contabilidad", areaId: "14" },
-
   { id: "compras", label: "Área de compras", areaId: "16" },
   {
     id: "almacen-suministros-bienes-muebles",
@@ -42,23 +44,24 @@ const subAreas = [
     areaId: "16",
   },
   { id: "gestion-control", label: "Área de gestión y control", areaId: "16" },
-
+  { id: "protocolo-area", label: "Área de protocolo", areaId: "6" },
   { id: "administracion-salarios", label: "Área de administración de salarios", areaId: "17" },
-
+  { id: "gestion-admin", label: "Área de Gestión Administrativa", areaId: "18" },
   {
     id: "aprobacion-seguimiento-evaluacion-presupuesto",
     label: "Área de aprobación, seguimiento y evaluación del presupuesto",
     areaId: "11",
   },
-
   { id: "procesos-legislativos", label: "Área de procesos legislativos", areaId: "6" },
   { id: "actas-sonido-grabacion", label: "Área de actas, sonido y grabación", areaId: "6" },
-
-  { id: "gestion-asuntos-plenario", label: "Área de gestión de asuntos del plenario", areaId: "2" },
-
-  { id: "todo-departamento-sub", label: "Todo el departamento", areaId: "15" },
-
+  { id: "gestion-asuntos-plenario", label: "Área de gestión de asuntos del plenario", areaId: "20" },
+  { id: "todo-departamento-sub", label: "Todo el departamento", areaId: "1" },
+  { id: "departamento-directorio", label: "Todo el departamento de Secretaria del Directorio", areaId: "20" },
+  { id: "dep-pren-inst", label: "Todo el departamento de Prensa Institucional", areaId: "8" },
+  { id: "dep-ser-salud", label: "Todo el departamento de Servicios de Salud", areaId: "18" },
+  { id: "dep-ser-tec", label: "Todo el departamento de Servicios Técnicos", areaId: "22" },
   { id: "contratacion-administrativa", label: "Área de contratación administrativa", areaId: "7" },
+  { id: "accesibilidad-discapacidad", label: "Área de accesibilidad para las personas con discapacidad en la Asamblea Legislativa", areaId: "4" },
 ];
 
 const tiposImpactoCat = [
@@ -70,6 +73,7 @@ const tiposImpactoCat = [
   "Seguridad de la Información",
   "Ambiental",
   "A la cuidadanía",
+  "Rompimiento del órden constitucional",
 ];
 
 const prioridades = ["Alta", "Media", "Baja"];
@@ -105,6 +109,34 @@ export default function InsertarProcesoCriticoPage() {
   const [pending, setPending] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [okMsg, setOkMsg] = useState<string | null>(null);
+
+  // 🔹 Estado para el combobox de departamento
+  const [departamentoId, setDepartamentoId] = useState("");
+  const [deptSearch, setDeptSearch] = useState("");
+  const [deptOpen, setDeptOpen] = useState(false);
+  const deptDropdownRef = useRef<HTMLDivElement | null>(null);
+
+  const filteredDepartamentos = departamentos.filter((d) =>
+    d.label.toLowerCase().includes(deptSearch.toLowerCase())
+  );
+
+  const selectedDepartamentoLabel =
+    departamentos.find((d) => d.id === departamentoId)?.label || "Seleccione un departamento…";
+
+  // Cerrar dropdown de departamento al hacer clic fuera
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        deptDropdownRef.current &&
+        !deptDropdownRef.current.contains(e.target as Node)
+      ) {
+        setDeptOpen(false);
+        setDeptSearch("");
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -161,164 +193,326 @@ export default function InsertarProcesoCriticoPage() {
 
       setOkMsg("Proceso crítico guardado correctamente.");
       e.currentTarget.reset();
+      setDepartamentoId("");
     } catch (err: any) {
       setErrors({ _root: err.message ?? "Error inesperado" });
     } finally {
       setPending(false);
     }
   }
-  //Color combo box
-  const fieldClass = "w-full border rounded p-2 bg-[white]";
+
+  const fieldClass =
+    "w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-800 " +
+    "shadow-sm outline-none focus:border-[#0073a4] focus:ring-2 focus:ring-[#0073a4]/30 transition";
+
+  const labelClass = "block text-sm font-semibold text-[#0073a4] mb-1";
 
   return (
-    <section className="text-black max-w-5xl">
-      <h1 className="text-3xl font-bold mb-6">Insertar Proceso Crítico</h1>
+    <section className="text-black max-w-6xl mx-auto">
+      <header className="mb-6">
+        <h1 className="text-3xl font-bold">Insertar Proceso Crítico</h1>
+        <p className="text-sm text-gray-600 mt-1">
+          Registre la información clave del proceso crítico, sus recursos y los impactos asociados
+          para el análisis BIA institucional.
+        </p>
+      </header>
 
-      {okMsg && (
-        <div className="bg-green-50 border border-green-300 text-green-700 p-2 rounded mb-4">
-          {okMsg}
-        </div>
-      )}
-      {errors._root && (
-        <div className="bg-red-50 border border-red-300 text-red-700 p-2 rounded mb-4">
-          {errors._root}
-        </div>
-      )}
-
-      <form onSubmit={onSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
-        {/* DEPARTAMENTO */}
-        <div>
-          <label className="font-semibold text-[#0073a4]">Departamento</label>
-          <select name="departamentoId" defaultValue="" className={fieldClass}>
-            <option value="" disabled>Seleccione...</option>
-            {departamentos.map((d) => (
-              <option key={d.id} value={d.id}>{d.label}</option>
-            ))}
-          </select>
-          {errors.departamentoId && (
-            <p className="text-sm text-red-600">{errors.departamentoId}</p>
-          )}
-        </div>
-
-        {/* SUBÁREAS */}
-        <fieldset className="md:col-span-2 border rounded p-3 bg-[white]">
-          <legend className="font-semibold text-[#0073a4] ">Subáreas</legend>
-          {errors.subAreaIds && (
-            <p className="text-sm text-red-600 mb-1">{errors.subAreaIds}</p>
-          )}
-
-          <div className="grid md:grid-cols-3 gap-2 bg-[white]">
-            {subAreas.map((s) => (
-              <label key={s.id} className="flex gap-2 items-center ">
-                <input type="checkbox" name="subAreaIds" value={s.id} />
-                {s.label}
-              </label>
-            ))}
+      <div className="bg-white/90 border border-gray-200 rounded-2xl shadow-md p-5 md:p-7">
+        {okMsg && (
+          <div className="bg-green-50 border border-green-300 text-green-800 px-3 py-2 rounded mb-4 text-sm">
+            {okMsg}
           </div>
-        </fieldset>
-
-        {/* CAMPOS GENERALES */}
-        <div>
-          <label className="font-semibold text-[#0073a4]">Nombre</label>
-          <input name="nombre" className={fieldClass} />
-          {errors.nombre && <p className="text-sm text-red-600">{errors.nombre}</p>}
-        </div>
-
-        <div>
-          <label className="font-semibold text-[#0073a4]">Prioridad</label>
-          <select name="prioridad" defaultValue="" className={fieldClass}>
-            <option value="" disabled>Seleccione...</option>
-            {prioridades.map((p) => (
-              <option key={p} value={p}>{p}</option>
-            ))}
-          </select>
-          {errors.prioridad && <p className="text-sm text-red-600">{errors.prioridad}</p>}
-        </div>
-
-        <div className="md:col-span-2">
-          <label className="font-semibold text-[#0073a4]">Descripción</label>
-          <textarea name="descripcion" rows={3} className={fieldClass} />
-          {errors.descripcion && <p className="text-sm text-red-600">{errors.descripcion}</p>}
-        </div>
-
-        {/* CAMPOS RESTANTES */}
-        <div>
-          <label className="font-semibold text-[#0073a4]">Entradas</label>
-          <textarea name="entradas" rows={2} className={fieldClass} />
-        </div>
-        <div>
-          <label className="font-semibold text-[#0073a4]">Salidas</label>
-          <textarea name="salidas" rows={2} className={fieldClass} />
-        </div>
-
-        <div>
-          <label className="font-semibold text-[#0073a4]">Partes interesadas</label>
-          <textarea name="partes" rows={2} className={fieldClass} />
-        </div>
-        <div>
-          <label className="font-semibold text-[#0073a4]">Sincronización</label>
-          <textarea name="sincronizacion" rows={2} className={fieldClass} />
-        </div>
-
-        <div>
-          <label className="font-semibold text-[#0073a4]">RTO</label>
-          <input name="rto" className={fieldClass} />
-        </div>
-        <div>
-          <label className="font-semibold text-[#0073a4]">MTPD</label>
-          <input name="mtpd" className={fieldClass} />
-        </div>
-        <div>
-          <label className="font-semibold text-[#0073a4]">RPO</label>
-          <input name="rpo" className={fieldClass} />
-        </div>
-
-        <div>
-          <label className="font-semibold text-[#0073a4]">Recursos</label>
-          <textarea name="recursos" rows={2} className={fieldClass} />
-        </div>
-        <div>
-          <label className="font-semibold text-[#0073a4]">Requisitos legales</label>
-          <textarea name="requisitos" rows={2} className={fieldClass} />
-        </div>
-
-        {/* TIPOS DE IMPACTO */}
-        <fieldset className="md:col-span-2 border rounded p-3 bg-[white]">
-          <legend className="font-semibold text-[#0073a4]">Tipos de impacto</legend>
-          {errors.tiposImpacto && (
-            <p className="text-sm text-red-600 mb-1">{errors.tiposImpacto}</p>
-          )}
-          <div className="grid md:grid-cols-3 gap-2 ">
-            {tiposImpactoCat.map((t) => (
-              <label key={t} className="flex gap-2 items-center">
-                <input type="checkbox" name="tiposImpacto" value={t} />
-                {t}
-              </label>
-            ))}
+        )}
+        {errors._root && (
+          <div className="bg-red-50 border border-red-300 text-red-700 px-3 py-2 rounded mb-4 text-sm">
+            {errors._root}
           </div>
-        </fieldset>
+        )}
 
-        <div className="md:col-span-2">
-          <label className="font-semibold text-[#0073a4]">Descripción del impacto</label>
-          <textarea name="descImpacto" rows={2} className={fieldClass} />
-        </div>
+        <form
+          onSubmit={onSubmit}
+          className="grid grid-cols-1 md:grid-cols-2 gap-5"
+        >
+          {/* === SECCIÓN: INFORMACIÓN GENERAL === */}
+          <div className="md:col-span-2">
+            <h2 className="text-sm font-semibold text-gray-700 mb-2">
+              Información general
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* DEPARTAMENTO - Combobox Moderno */}
+              <div className="relative" ref={deptDropdownRef}>
+                <label className={labelClass}>Departamento</label>
 
-        {/* ACCIONES */}
-        <div className="md:col-span-2 flex gap-3 mt-2">
-          <button
-            type="submit"
-            disabled={pending}
-            className="bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50"
-          >
-            {pending ? "Guardando..." : "Guardar"}
-          </button>
-          <button type="reset" className="bg-yellow-600 text-white px-4 py-2 rounded disabled:opacity-50">
-            Limpiar
-          </button>
-        </div>
+                {/* input hidden para FormData */}
+                <input type="hidden" name="departamentoId" value={departamentoId} />
 
-      </form>
+                <button
+                  type="button"
+                  onClick={() => setDeptOpen((prev) => !prev)}
+                  className="
+                    w-full flex items-center justify-between
+                    px-4 py-2.5 rounded-xl bg-white border border-gray-300 shadow-sm
+                    hover:border-[#0073a4] focus:border-[#0073a4]
+                    focus:ring-2 focus:ring-[#0073a4]/30 transition-all
+                    text-left text-sm font-medium text-gray-700
+                  "
+                >
+                  <span>{selectedDepartamentoLabel}</span>
+                  <svg
+                    className={`w-5 h-5 text-gray-500 transition-transform ${
+                      deptOpen ? "rotate-180" : "rotate-0"
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {deptOpen && (
+                  <div className="absolute mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-xl max-h-64 overflow-hidden z-50">
+                    <div className="p-2 border-b border-gray-200 bg-gray-50">
+                      <input
+                        type="text"
+                        placeholder="Buscar departamento..."
+                        className="
+                          w-full px-3 py-2 rounded-lg bg-white border border-gray-300
+                          text-gray-700 text-sm outline-none
+                          focus:border-[#0073a4] focus:ring-2 focus:ring-[#0073a4]/30
+                          transition-all
+                        "
+                        value={deptSearch}
+                        onChange={(e) => setDeptSearch(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+
+                    <div className="max-h-56 overflow-y-auto">
+                      {filteredDepartamentos.length > 0 ? (
+                        filteredDepartamentos.map((d) => (
+                          <div
+                            key={d.id}
+                            className={`
+                              px-4 py-2.5 cursor-pointer text-sm transition-all
+                              ${
+                                departamentoId === d.id
+                                  ? "bg-[#0073a4]/10 text-[#0073a4] font-semibold"
+                                  : "hover:bg-gray-100"
+                              }
+                            `}
+                            onClick={() => {
+                              setDepartamentoId(d.id);
+                              setDeptOpen(false);
+                              setDeptSearch("");
+                            }}
+                          >
+                            {d.label}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="px-4 py-3 text-gray-500 text-sm">
+                          No hay coincidencias
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {errors.departamentoId && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {errors.departamentoId}
+                  </p>
+                )}
+              </div>
+
+              {/* PRIORIDAD */}
+              <div>
+                <label className={labelClass}>Prioridad</label>
+                <select name="prioridad" defaultValue="" className={fieldClass}>
+                  <option value="" disabled>
+                    Seleccione...
+                  </option>
+                  {prioridades.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+                {errors.prioridad && (
+                  <p className="text-xs text-red-600 mt-1">{errors.prioridad}</p>
+                )}
+              </div>
+
+              {/* NOMBRE */}
+              <div className="md:col-span-2">
+                <label className={labelClass}>Nombre del Proceso Crítico</label>
+                <input name="nombre" className={fieldClass} />
+                {errors.nombre && (
+                  <p className="text-xs text-red-600 mt-1">{errors.nombre}</p>
+                )}
+              </div>
+
+              {/* DESCRIPCIÓN */}
+              <div className="md:col-span-2">
+                <label className={labelClass}>Descripción del Proceso Crítico</label>
+                <textarea
+                  name="descripcion"
+                  rows={3}
+                  className={fieldClass + " resize-y"}
+                />
+                {errors.descripcion && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {errors.descripcion}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* === SECCIÓN: SUBÁREAS === */}
+          <fieldset className="md:col-span-2 border border-gray-200 rounded-xl p-4 bg-slate-50/60">
+            <legend className="px-2 text-sm font-semibold text-[#0073a4]">
+              Subáreas vinculadas
+            </legend>
+            {errors.subAreaIds && (
+              <p className="text-xs text-red-600 mb-2">{errors.subAreaIds}</p>
+            )}
+
+            <div className="grid md:grid-cols-3 gap-2 mt-2">
+              {subAreas.map((s) => (
+                <label
+                  key={s.id}
+                  className="
+                    flex gap-2 items-center text-sm bg-white border border-gray-200
+                    rounded-lg px-3 py-2 hover:border-[#0073a4]/70 cursor-pointer
+                    transition
+                  "
+                >
+                  <input type="checkbox" name="subAreaIds" value={s.id} />
+                  <span className="text-gray-800">{s.label}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          {/* === SECCIÓN: DETALLE DEL PROCESO === */}
+          <div className="md:col-span-2">
+            <h2 className="text-sm font-semibold text-gray-700 mb-2">
+              Detalle del proceso
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Entradas</label>
+                <textarea name="entradas" rows={2} className={fieldClass + " resize-y"} />
+              </div>
+              <div>
+                <label className={labelClass}>Salidas</label>
+                <textarea name="salidas" rows={2} className={fieldClass + " resize-y"} />
+              </div>
+
+              <div>
+                <label className={labelClass}>Partes interesadas</label>
+                <textarea name="partes" rows={2} className={fieldClass + " resize-y"} />
+              </div>
+              <div>
+                <label className={labelClass}>Sincronización con otros procesos</label>
+                <textarea
+                  name="sincronizacion"
+                  rows={2}
+                  className={fieldClass + " resize-y"}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>RTO</label>
+                <input name="rto" className={fieldClass} />
+              </div>
+              <div>
+                <label className={labelClass}>MTPD</label>
+                <input name="mtpd" className={fieldClass} />
+              </div>
+              <div>
+                <label className={labelClass}>RPO</label>
+                <input name="rpo" className={fieldClass} />
+              </div>
+
+              <div>
+                <label className={labelClass}>Recursos necesarios</label>
+                <textarea name="recursos" rows={2} className={fieldClass + " resize-y"} />
+              </div>
+              <div>
+                <label className={labelClass}>Requisitos legales y normativos</label>
+                <textarea
+                  name="requisitos"
+                  rows={2}
+                  className={fieldClass + " resize-y"}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* === SECCIÓN: IMPACTOS === */}
+          <fieldset className="md:col-span-2 border border-gray-200 rounded-xl p-4 bg-slate-50/60">
+            <legend className="px-2 text-sm font-semibold text-[#0073a4]">
+              Impactos asociados
+            </legend>
+
+            {errors.tiposImpacto && (
+              <p className="text-xs text-red-600 mb-2">{errors.tiposImpacto}</p>
+            )}
+
+            <div className="grid md:grid-cols-3 gap-2 mb-3">
+              {tiposImpactoCat.map((t) => (
+                <label
+                  key={t}
+                  className="
+                    flex gap-2 items-center text-sm bg-white border border-gray-200
+                    rounded-lg px-3 py-2 hover:border-[#0073a4]/70 cursor-pointer
+                    transition
+                  "
+                >
+                  <input type="checkbox" name="tiposImpacto" value={t} />
+                  <span className="text-gray-800">{t}</span>
+                </label>
+              ))}
+            </div>
+
+            <div>
+              <label className={labelClass}>Descripción del impacto</label>
+              <textarea
+                name="descImpacto"
+                rows={3}
+                className={fieldClass + " resize-y"}
+              />
+            </div>
+          </fieldset>
+
+          {/* ACCIONES */}
+          <div className="md:col-span-2 flex flex-col sm:flex-row gap-3 mt-2 justify-end">
+            <button
+              type="reset"
+              className="px-4 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition"
+              disabled={pending}
+            >
+              Limpiar
+            </button>
+            <button
+              type="submit"
+              disabled={pending}
+              className="
+                px-5 py-2.5 rounded-lg text-sm font-semibold text-white
+                bg-emerald-600 hover:bg-emerald-500
+                disabled:opacity-60 disabled:cursor-not-allowed
+                shadow-md shadow-emerald-500/25 transition
+              "
+            >
+              {pending ? "Guardando..." : "Guardar proceso crítico"}
+            </button>
+          </div>
+        </form>
+      </div>
     </section>
   );
 }

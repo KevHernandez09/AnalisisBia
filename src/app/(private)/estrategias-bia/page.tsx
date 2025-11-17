@@ -53,6 +53,9 @@ export default function EstrategiasContinuidadPage() {
     { id: "17", label: "Departamento de Recursos Humanos" },
     { id: "18", label: "Departamento de Servicios de Salud" },
     { id: "19", label: "Comité Institucional de Emergencias" },
+    { id: "20", label: "Departamento de Secretaria del Directorio" },
+    { id: "21", label: "Departamento de Servicios Parlamentarios" },
+    { id: "22", label: "Departamento de Servicios Técnicos" },
   ];
 
   const filtered = opciones.filter((op) =>
@@ -122,6 +125,20 @@ export default function EstrategiasContinuidadPage() {
     return 999;
   };
 
+  // Colores por tipo de estrategia
+  const tipoBadge = (tipo: string) => {
+    const t = tipo.toLowerCase();
+    if (t.includes("prev"))
+      return "bg-sky-100 text-sky-800 border-sky-300";
+    if (t.includes("conting"))
+      return "bg-amber-100 text-amber-800 border-amber-300";
+    if (t.includes("recup"))
+      return "bg-emerald-100 text-emerald-800 border-emerald-300";
+    if (t.includes("comun") || t.includes("divulg"))
+      return "bg-indigo-100 text-indigo-800 border-indigo-300";
+    return "bg-gray-100 text-gray-800 border-gray-300";
+  };
+
   // Agrupar por proceso y ordenar las estrategias por tipo
   const grouped = useMemo<GroupedProcess[]>(() => {
     const map = new Map<string, GroupedProcess>();
@@ -149,8 +166,12 @@ export default function EstrategiasContinuidadPage() {
       <h1 className="text-3xl font-bold mb-2">Estrategias de Continuidad</h1>
 
       <p className="text-sm text-gray-600 mb-4">
-        Departamento: {selected ? selectedLabel : "Ninguno"} — Registros:{" "}
-        {rows.length}
+        Departamento:{" "}
+        <span className="font-medium">
+          {selected ? selectedLabel : "Ninguno"}
+        </span>{" "}
+        — Registros:{" "}
+        <span className="font-medium">{rows.length}</span>
       </p>
 
       {/* 🔥 Combobox Moderno */}
@@ -168,8 +189,9 @@ export default function EstrategiasContinuidadPage() {
         >
           <span>{selectedLabel}</span>
           <svg
-            className={`w-5 h-5 text-gray-500 transition-transform ${open ? "rotate-180" : "rotate-0"
-              }`}
+            className={`w-5 h-5 text-gray-500 transition-transform ${
+              open ? "rotate-180" : "rotate-0"
+            }`}
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
@@ -204,9 +226,10 @@ export default function EstrategiasContinuidadPage() {
                     key={op.id}
                     className={`
                       px-4 py-2.5 cursor-pointer text-sm transition-all
-                      ${selected === op.id
-                        ? "bg-[#0073a4]/10 text-[#0073a4] font-semibold"
-                        : "hover:bg-gray-100"
+                      ${
+                        selected === op.id
+                          ? "bg-[#0073a4]/10 text-[#0073a4] font-semibold"
+                          : "hover:bg-gray-100"
                       }
                     `}
                     onClick={() => {
@@ -238,116 +261,157 @@ export default function EstrategiasContinuidadPage() {
         <p className="mb-3 text-gray-600">Cargando estrategias…</p>
       )}
 
-      {/* Tabla con 4 filas por proceso, como en la plantilla */}
-      <div className="mt-4 bg-[#0073a4] border rounded shadow-sm">
-        <div className="w-full overflow-x-auto">
-          <table className="min-w-[1600px] border-collapse">
-            <thead>
-              <tr className="bg-[#0073a4] text-white text-[13px]">
-                <th className="border px-2 py-2 text-left">
-                  Nombre del Proceso Crítico
-                </th>
-                <th className="border px-2 py-2 text-left">
-                  Descripción del Proceso Crítico
-                </th>
-                <th className="border px-2 py-2 text-left">
-                  Tipo de estrategia
-                </th>
-                <th className="border px-2 py-2 text-left">
-                  Estrategias y soluciones de continuidad
-                </th>
-                <th className="border px-2 py-2 text-left">
-                  Asignación de recursos necesarios
-                </th>
-                <th className="border px-2 py-2 text-left">
-                  Asignación de responsabilidades
-                </th>
-                <th className="border px-2 py-2 text-left">
-                  Roles o funciones de los responsables
-                </th>
-                <th className="border px-2 py-2 text-left">
-                  Estructura de respuesta (alertamiento)
-                </th>
-                <th className="border px-2 py-2 text-left">
-                  Actividades a desarrollar en pruebas y simulacros
-                </th>
-                <th className="border px-2 py-2 text-left">
-                  Frecuencias de pruebas y simulacros
-                </th>
-              </tr>
-            </thead>
+      {/* 🔥 VISTA MODERNA: TARJETAS POR PROCESO */}
+      {grouped.length > 0 ? (
+        <div className="space-y-5">
+          {grouped.map((g) => (
+            <article
+              key={g.key}
+              className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden"
+            >
+              {/* Header proceso */}
+              <header className="px-4 py-3 border-b border-gray-200 bg-slate-50">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">
+                  Proceso crítico
+                </p>
+                <h2 className="text-lg font-semibold text-slate-900">
+                  {g.proceso || "Sin nombre de proceso"}
+                </h2>
+                {g.descripcion && (
+                  <p className="mt-1 text-sm text-slate-700 whitespace-pre-line">
+                    {g.descripcion}
+                  </p>
+                )}
+              </header>
 
-            <tbody className="text-[13px]">
-              {grouped.length > 0 ? (
-                grouped.map((g) => {
-                  const estrategias = g.estrategias;
-                  const rowSpan = estrategias.length || 1;
-
-                  return estrategias.map((e, idx) => (
-                    <tr
-                      key={`${g.key}-${idx}`}
-                      className="odd:bg-white even:bg-gray-50 align-top"
-                    >
-                      {idx === 0 && (
-                        <>
-                          <td
-                            className="border px-2 py-2"
-                            rowSpan={rowSpan}
-                          >
-                            {g.proceso}
-                          </td>
-                          <td
-                            className="border px-2 py-2"
-                            rowSpan={rowSpan}
-                          >
-                            {g.descripcion}
-                          </td>
-                        </>
-                      )}
-
-                      <td className="border px-2 py-2 whitespace-pre-line">
-                        {e.tipo}
-                      </td>
-                      <td className="border px-2 py-2 whitespace-pre-line">
-                        {e.soluciones}
-                      </td>
-                      <td className="border px-2 py-2 whitespace-pre-line">
-                        {e.recursos}
-                      </td>
-                      <td className="border px-2 py-2 whitespace-pre-line">
-                        {e.responsabilidades}
-                      </td>
-                      <td className="border px-2 py-2 whitespace-pre-line">
-                        {e.roles}
-                      </td>
-                      <td className="border px-2 py-2 whitespace-pre-line">
-                        {e.estructura}
-                      </td>
-                      <td className="border px-2 py-2 whitespace-pre-line">
-                        {e.actividades}
-                      </td>
-                      <td className="border px-2 py-2 whitespace-pre-line">
-                        {e.frecuencias}
-                      </td>
-                    </tr>
-                  ));
-                })
-              ) : (
-                <tr>
-                  <td
-                    colSpan={10}
-                    className="border px-4 py-6 text-center text-gray-500 italic bg-gray-50"
+              {/* Lista de estrategias */}
+              <div className="px-4 py-3 space-y-3">
+                {g.estrategias.map((e, idx) => (
+                  <div
+                    key={`${g.key}-estrategia-${idx}`}
+                    className="rounded-lg border border-gray-200 bg-slate-50/60 px-3 py-3"
                   >
-                    {selected
-                      ? "No hay estrategias registradas para este departamento."
-                      : "Seleccione un departamento para ver estrategias."}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                    <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between mb-2">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                          Estrategia
+                        </p>
+                        <p className="text-sm text-slate-800 whitespace-pre-line">
+                          {e.soluciones || "Sin descripción de estrategia."}
+                        </p>
+                      </div>
+
+                      {e.tipo && (
+                        <span
+                          className={`
+                            inline-flex items-center px-3 py-1 rounded-full border
+                            text-xs font-semibold mt-2 md:mt-0
+                            ${tipoBadge(e.tipo)}
+                          `}
+                        >
+                          {e.tipo}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="grid gap-3 md:grid-cols-2 text-sm">
+                      <div className="space-y-2">
+                        <div>
+                          <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                            Recursos necesarios
+                          </h3>
+                          <p className="text-slate-800 whitespace-pre-line">
+                            {e.recursos || "—"}
+                          </p>
+                        </div>
+
+                        <div>
+                          <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                            Responsables
+                          </h3>
+                          <p className="text-slate-800 whitespace-pre-line">
+                            {e.responsabilidades || "—"}
+                          </p>
+                        </div>
+
+                        <div>
+                          <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                            Roles o funciones
+                          </h3>
+                          <p className="text-slate-800 whitespace-pre-line">
+                            {e.roles || "—"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div>
+                          <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                            Estructura de respuesta (alertamiento)
+                          </h3>
+                          <p className="text-slate-800 whitespace-pre-line">
+                            {e.estructura || "—"}
+                          </p>
+                        </div>
+
+                        <div>
+                          <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                            Actividades en pruebas y simulacros
+                          </h3>
+                          <p className="text-slate-800 whitespace-pre-line">
+                            {e.actividades || "—"}
+                          </p>
+                        </div>
+
+                        <div>
+                          <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                            Frecuencia de pruebas / simulacros
+                          </h3>
+                          <p className="text-slate-800 whitespace-pre-line">
+                            {e.frecuencias || "—"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {(e.resultados || e.monitoreo) && (
+                      <div className="mt-3 grid gap-2 md:grid-cols-2 text-sm">
+                        {e.resultados && (
+                          <div>
+                            <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                              Resultados de pruebas / simulacros
+                            </h3>
+                            <p className="text-slate-800 whitespace-pre-line">
+                              {e.resultados}
+                            </p>
+                          </div>
+                        )}
+
+                        {e.monitoreo && (
+                          <div>
+                            <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                              Monitoreo y mejora continua
+                            </h3>
+                            <p className="text-slate-800 whitespace-pre-line">
+                              {e.monitoreo}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </article>
+          ))}
         </div>
-      </div>
+      ) : (
+        <div className="mt-6 border rounded-xl bg-gray-50 px-4 py-6 text-center text-gray-500 italic">
+          {selected
+            ? "No hay estrategias registradas para este departamento."
+            : "Seleccione un departamento para ver estrategias."}
+        </div>
+      )}
     </section>
   );
 }

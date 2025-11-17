@@ -4,7 +4,6 @@ import { useState } from "react";
 import { z } from "zod";
 
 const areas = [
-  { id: "1", label: "Todo el departamento" },
   { id: "2", label: "Gerencia General" },
   { id: "3", label: "Gerencia Técnico Operativa" },
   { id: "4", label: "Departamento de Desarrollo Sostenible" },
@@ -16,13 +15,16 @@ const areas = [
   { id: "10", label: "Departamento de Instituto de Formación e Investigación" },
   { id: "11", label: "Departamento Análisis Presupuestario" },
   { id: "12", label: "Departamento de Comisiones Legislativas" },
-  { id: "13", label: "Departamento de __________________" },
+  { id: "13", label: "Gerencia Administrativa" },
   { id: "14", label: "Departamento de Financiero" },
   { id: "15", label: "Departamento de Servicios Generales" },
   { id: "16", label: "Departamento de Proveeduría" },
   { id: "17", label: "Departamento de Recursos Humanos" },
   { id: "18", label: "Departamento de Servicios de Salud" },
   { id: "19", label: "Comité Institucional de Emergencias" },
+  { id: "20", label: "Departamento de Secretaria del Directorio" },
+  { id: "21", label: "Departamento de Servicios Parlamentarios" },
+  { id: "22", label: "Departamento de Servicios Técnicos" },
 ];
 
 const EstrategiaSchema = z.object({
@@ -163,7 +165,7 @@ export default function InsertarEstrategiaContinuidadPage() {
 
     const d = parsed.data;
 
-    // Construimos el payload: 4 estrategias en un solo envío
+    // Payload: 4 estrategias en un solo envío
     const payload = {
       areaIds: d.areaIds,
       nombreProceso: d.nombreProceso,
@@ -240,386 +242,521 @@ export default function InsertarEstrategiaContinuidadPage() {
   }
 
   const field =
-    "w-full border rounded p-2 bg-white text-black placeholder-gray-400";
-  const label = "block text-sm font-semibold mb-1";
+    "w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-800 " +
+    "shadow-sm outline-none focus:border-[#0073a4] focus:ring-2 focus:ring-[#0073a4]/30 transition";
+
+  const label = "block text-sm font-semibold text-[#0073a4] mb-1";
 
   return (
-    <section className="text-black max-w-5xl">
-      <h1 className="text-3xl font-bold mb-6">Estrategias de Continuidad</h1>
+    <section className="text-black max-w-6xl mx-auto">
+      <header className="mb-6">
+        <h1 className="text-3xl font-bold">Estrategias de Continuidad</h1>
+        <p className="text-sm text-gray-600 mt-1">
+          Registre, para un proceso crítico, las estrategias de prevención, contingencia,
+          recuperación y comunicación/divulgación.
+        </p>
+      </header>
 
-      {okMsg && (
-        <div className="mb-4 rounded bg-green-50 border border-green-300 text-green-700 px-3 py-2">
-          {okMsg}
-        </div>
-      )}
-      {errors._root && (
-        <div className="mb-4 rounded bg-red-50 border border-red-300 text-red-700 px-3 py-2">
-          {errors._root}
-        </div>
-      )}
-
-      <form
-        id="form-continuidad"
-        className="grid grid-cols-1 md:grid-cols-2 gap-4"
-        action={onSubmit}
-      >
-        {/* Áreas (multiselección) */}
-        <fieldset className="md:col-span-2 border rounded p-3 bg-[white]">
-          <legend className="text-sm font-semibold text-[#0073a4]">
-            Áreas/Departamentos (puede elegir varias)
-          </legend>
-          {errors.areaIds && (
-            <p className="text-sm text-red-600 mb-1">{errors.areaIds}</p>
-          )}
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
-            {areas.map((a) => (
-              <label key={a.id} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  name="areaIds"
-                  value={a.id}
-                  className="h-4 w-4"
-                />
-                <span>{a.label}</span>
-              </label>
-            ))}
+      <div className="bg-white/90 border border-gray-200 rounded-2xl shadow-md p-5 md:p-7">
+        {okMsg && (
+          <div className="mb-4 rounded bg-green-50 border border-green-300 text-green-700 px-3 py-2 text-sm">
+            {okMsg}
           </div>
-        </fieldset>
+        )}
+        {errors._root && (
+          <div className="mb-4 rounded bg-red-50 border border-red-300 text-red-700 px-3 py-2 text-sm">
+            {errors._root}
+          </div>
+        )}
 
-        {/* Proceso crítico */}
-        <div className="text-[#0073a4]">
-          <label className={label}>Nombre del Proceso Crítico</label>
-          <input
-            name="nombreProceso"
-            className={field}
-            placeholder="Ej.: Nómina, Ventas, Mesa de ayuda..."
-          />
-          {errors.nombreProceso && (
-            <p className="text-sm text-red-600 mt-1">
-              {errors.nombreProceso}
+        <form
+          id="form-continuidad"
+          className="grid grid-cols-1 md:grid-cols-2 gap-5"
+          action={onSubmit}
+        >
+          {/* Áreas (multiselección) */}
+          <fieldset className="md:col-span-2 border border-gray-200 rounded-xl p-4 bg-slate-50/60">
+            <legend className="px-2 text-sm font-semibold text-[#0073a4]">
+              Áreas / Departamentos (puede elegir varias)
+            </legend>
+            {errors.areaIds && (
+              <p className="text-xs text-red-600 mb-2">{errors.areaIds}</p>
+            )}
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+              {areas.map((a) => (
+                <label
+                  key={a.id}
+                  className="
+                    flex items-center gap-2 text-sm bg-white border border-gray-200
+                    rounded-lg px-3 py-2 hover:border-[#0073a4]/70 cursor-pointer
+                    transition
+                  "
+                >
+                  <input
+                    type="checkbox"
+                    name="areaIds"
+                    value={a.id}
+                    className="h-4 w-4"
+                  />
+                  <span className="text-gray-800">{a.label}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          {/* Proceso crítico */}
+          <div>
+            <label className={label}>Nombre del Proceso Crítico</label>
+            <input
+              name="nombreProceso"
+              className={field}
+              placeholder="Ej.: Gestión de nómina, Atención al ciudadano..."
+            />
+            {errors.nombreProceso && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.nombreProceso}
+              </p>
+            )}
+          </div>
+          <div>
+            <label className={label}>Descripción del Proceso Crítico</label>
+            <textarea
+              name="descripcionProceso"
+              rows={3}
+              className={field + " resize-y"}
+            />
+            {errors.descripcionProceso && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.descripcionProceso}
+              </p>
+            )}
+          </div>
+
+          {/* ================== ESTRATEGIA DE PREVENCIÓN ================== */}
+          <div className="md:col-span-2 border-t border-gray-200 pt-4 mt-4">
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+              Estrategias de prevención
+            </h2>
+            <p className="text-xs text-gray-500 mb-3">
+              Medidas para evitar o reducir la probabilidad de interrupciones del proceso.
             </p>
-          )}
-        </div>
-        <div className="text-[#0073a4]">
-          <label className={label}>Descripción del Proceso Crítico</label>
-          <textarea name="descripcionProceso" rows={3} className={field} />
-          {errors.descripcionProceso && (
-            <p className="text-sm text-red-600 mt-1">
-              {errors.descripcionProceso}
+          </div>
+
+          <div className="md:col-span-2">
+            <label className={label}>
+              1. Estrategias y soluciones de continuidad *
+            </label>
+            <textarea
+              name="prev_soluciones"
+              rows={3}
+              className={field + " resize-y"}
+            />
+            {errors.prev_soluciones && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.prev_soluciones}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className={label}>2. Asignación de recursos necesarios</label>
+            <textarea name="prev_recursos" rows={2} className={field + " resize-y"} />
+          </div>
+
+          <div>
+            <label className={label}>3. Asignación de responsabilidades</label>
+            <textarea
+              name="prev_responsabilidades"
+              rows={2}
+              className={field + " resize-y"}
+            />
+          </div>
+
+          <div>
+            <label className={label}>
+              4. Roles o funciones de los responsables
+            </label>
+            <textarea name="prev_roles" rows={2} className={field + " resize-y"} />
+          </div>
+
+          <div>
+            <label className={label}>5. Estructura de respuesta (alertamiento)</label>
+            <textarea
+              name="prev_estructura"
+              rows={2}
+              className={field + " resize-y"}
+            />
+          </div>
+
+          <div>
+            <label className={label}>
+              6. Actividades a desarrollar en pruebas y simulacros
+            </label>
+            <textarea
+              name="prev_actividades"
+              rows={2}
+              className={field + " resize-y"}
+            />
+          </div>
+
+          <div>
+            <label className={label}>
+              7. Frecuencias de pruebas y simulacros
+            </label>
+            <input
+              name="prev_frecuencias"
+              className={field}
+              placeholder="Mensual / Trimestral / Semestral / Anual..."
+            />
+          </div>
+
+          <div>
+            <label className={label}>
+              8. Resultados de las pruebas y simulacros
+            </label>
+            <textarea
+              name="prev_resultados"
+              rows={2}
+              className={field + " resize-y"}
+            />
+          </div>
+
+          <div>
+            <label className={label}>
+              9. Monitoreo y evaluación del desempeño
+            </label>
+            <textarea
+              name="prev_monitoreo"
+              rows={2}
+              className={field + " resize-y"}
+            />
+          </div>
+
+          {/* ================== ESTRATEGIA DE CONTINGENCIA ================== */}
+          <div className="md:col-span-2 border-t border-gray-200 pt-4 mt-4">
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+              Estrategias de contingencia
+            </h2>
+            <p className="text-xs text-gray-500 mb-3">
+              Acciones previstas para responder ante incidentes o eventos disruptivos.
             </p>
-          )}
-        </div>
+          </div>
 
-        {/* ================== ESTRATEGIA DE PREVENCIÓN ================== */}
-        <div className="md:col-span-2">
-          <h2 className="text-xl font-semibold mt-2 mb-2">
-            Estrategias de prevención
-          </h2>
-        </div>
+          <div className="md:col-span-2">
+            <label className={label}>
+              1. Estrategias y soluciones de continuidad *
+            </label>
+            <textarea
+              name="cont_soluciones"
+              rows={3}
+              className={field + " resize-y"}
+            />
+            {errors.cont_soluciones && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.cont_soluciones}
+              </p>
+            )}
+          </div>
 
-        <div className="md:col-span-2 text-[#0073a4]">
-          <label className={label}>
-            1. Estrategias y soluciones de continuidad *
-          </label>
-          <textarea name="prev_soluciones" rows={3} className={field} />
-          {errors.prev_soluciones && (
-            <p className="text-sm text-red-600 mt-1">
-              {errors.prev_soluciones}
+          <div>
+            <label className={label}>2. Asignación de recursos necesarios</label>
+            <textarea name="cont_recursos" rows={2} className={field + " resize-y"} />
+          </div>
+
+          <div>
+            <label className={label}>3. Asignación de responsabilidades</label>
+            <textarea
+              name="cont_responsabilidades"
+              rows={2}
+              className={field + " resize-y"}
+            />
+          </div>
+
+          <div>
+            <label className={label}>
+              4. Roles o funciones de los responsables
+            </label>
+            <textarea name="cont_roles" rows={2} className={field + " resize-y"} />
+          </div>
+
+          <div>
+            <label className={label}>5. Estructura de respuesta (alertamiento)</label>
+            <textarea
+              name="cont_estructura"
+              rows={2}
+              className={field + " resize-y"}
+            />
+          </div>
+
+          <div>
+            <label className={label}>
+              6. Actividades a desarrollar en pruebas y simulacros
+            </label>
+            <textarea
+              name="cont_actividades"
+              rows={2}
+              className={field + " resize-y"}
+            />
+          </div>
+
+          <div>
+            <label className={label}>
+              7. Frecuencias de pruebas y simulacros
+            </label>
+            <input
+              name="cont_frecuencias"
+              className={field}
+              placeholder="Mensual / Trimestral / Semestral / Anual..."
+            />
+          </div>
+
+          <div>
+            <label className={label}>
+              8. Resultados de las pruebas y simulacros
+            </label>
+            <textarea
+              name="cont_resultados"
+              rows={2}
+              className={field + " resize-y"}
+            />
+          </div>
+
+          <div>
+            <label className={label}>
+              9. Monitoreo y evaluación del desempeño
+            </label>
+            <textarea
+              name="cont_monitoreo"
+              rows={2}
+              className={field + " resize-y"}
+            />
+          </div>
+
+          {/* ================== ESTRATEGIA DE RECUPERACIÓN ================== */}
+          <div className="md:col-span-2 border-t border-gray-200 pt-4 mt-4">
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+              Estrategias de recuperación
+            </h2>
+            <p className="text-xs text-gray-500 mb-3">
+              Medidas para restablecer el servicio o proceso a niveles aceptables.
             </p>
-          )}
-        </div>
+          </div>
 
-        <div className="text-[#0073a4]">
-          <label className={label}>2. Asignación de recursos necesarios</label>
-          <textarea name="prev_recursos" rows={2} className={field} />
-        </div>
+          <div className="md:col-span-2">
+            <label className={label}>
+              1. Estrategias y soluciones de continuidad *
+            </label>
+            <textarea
+              name="rec_soluciones"
+              rows={3}
+              className={field + " resize-y"}
+            />
+            {errors.rec_soluciones && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.rec_soluciones}
+              </p>
+            )}
+          </div>
 
-        <div className="text-[#0073a4]">
-          <label className={label}>3. Asignación de responsabilidades</label>
-          <textarea name="prev_responsabilidades" rows={2} className={field} />
-        </div>
+          <div>
+            <label className={label}>2. Asignación de recursos necesarios</label>
+            <textarea name="rec_recursos" rows={2} className={field + " resize-y"} />
+          </div>
 
-        <div className="text-[#0073a4]">
-          <label className={label}>
-            4. Roles o funciones de los responsables
-          </label>
-          <textarea name="prev_roles" rows={2} className={field} />
-        </div>
+          <div>
+            <label className={label}>3. Asignación de responsabilidades</label>
+            <textarea
+              name="rec_responsabilidades"
+              rows={2}
+              className={field + " resize-y"}
+            />
+          </div>
 
-        <div className="text-[#0073a4]">
-          <label className={label}>5. Estructura de respuesta (alertamiento)</label>
-          <textarea name="prev_estructura" rows={2} className={field} />
-        </div>
+          <div>
+            <label className={label}>
+              4. Roles o funciones de los responsables
+            </label>
+            <textarea name="rec_roles" rows={2} className={field + " resize-y"} />
+          </div>
 
-        <div className="text-[#0073a4]">
-          <label className={label}>
-            6. Actividades a desarrollar en pruebas y simulacros
-          </label>
-          <textarea name="prev_actividades" rows={2} className={field} />
-        </div>
+          <div>
+            <label className={label}>5. Estructura de respuesta (alertamiento)</label>
+            <textarea
+              name="rec_estructura"
+              rows={2}
+              className={field + " resize-y"}
+            />
+          </div>
 
-        <div className="text-[#0073a4]">
-          <label className={label}>
-            7. Frecuencias de pruebas y simulacros
-          </label>
-          <input
-            name="prev_frecuencias"
-            className={field}
-            placeholder="Mensual / Trimestral / Semestral / Anual..."
-          />
-        </div>
+          <div>
+            <label className={label}>
+              6. Actividades a desarrollar en pruebas y simulacros
+            </label>
+            <textarea
+              name="rec_actividades"
+              rows={2}
+              className={field + " resize-y"}
+            />
+          </div>
 
-        <div className="text-[#0073a4]">
-          <label className={label}>
-            8. Resultados de las pruebas y simulacros
-          </label>
-          <textarea name="prev_resultados" rows={2} className={field} />
-        </div>
+          <div>
+            <label className={label}>
+              7. Frecuencias de pruebas y simulacros
+            </label>
+            <input
+              name="rec_frecuencias"
+              className={field}
+              placeholder="Mensual / Trimestral / Semestral / Anual..."
+            />
+          </div>
 
-        <div className="text-[#0073a4]">
-          <label className={label}>
-            9. Monitoreo y evaluación del desempeño
-          </label>
-          <textarea name="prev_monitoreo" rows={2} className={field} />
-        </div>
+          <div>
+            <label className={label}>
+              8. Resultados de las pruebas y simulacros
+            </label>
+            <textarea
+              name="rec_resultados"
+              rows={2}
+              className={field + " resize-y"}
+            />
+          </div>
 
-        {/* ================== ESTRATEGIA DE CONTINGENCIA ================== */}
-        <div className="md:col-span-2">
-          <h2 className="text-xl font-semibold mt-4 mb-2">
-            Estrategias de contingencia
-          </h2>
-        </div>
+          <div>
+            <label className={label}>
+              9. Monitoreo y evaluación del desempeño
+            </label>
+            <textarea
+              name="rec_monitoreo"
+              rows={2}
+              className={field + " resize-y"}
+            />
+          </div>
 
-        <div className="md:col-span-2 text-[#0073a4]">
-          <label className={label}>
-            1. Estrategias y soluciones de continuidad *
-          </label>
-          <textarea name="cont_soluciones" rows={3} className={field} />
-          {errors.cont_soluciones && (
-            <p className="text-sm text-red-600 mt-1">
-              {errors.cont_soluciones}
+          {/* ========== ESTRATEGIAS DE COMUNICACIÓN / DIVULGACIÓN ========== */}
+          <div className="md:col-span-2 border-t border-gray-200 pt-4 mt-4">
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+              Estrategias de comunicación / divulgación
+            </h2>
+            <p className="text-xs text-gray-500 mb-3">
+              Defina cómo se informará y sensibilizará a las partes interesadas.
             </p>
-          )}
-        </div>
+          </div>
 
-        <div className="text-[#0073a4]">
-          <label className={label}>2. Asignación de recursos necesarios</label>
-          <textarea name="cont_recursos" rows={2} className={field} />
-        </div>
+          <div className="md:col-span-2">
+            <label className={label}>
+              1. Estrategias y soluciones de continuidad *
+            </label>
+            <textarea
+              name="com_soluciones"
+              rows={3}
+              className={field + " resize-y"}
+            />
+            {errors.com_soluciones && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.com_soluciones}
+              </p>
+            )}
+          </div>
 
-        <div className="text-[#0073a4]">
-          <label className={label}>3. Asignación de responsabilidades</label>
-          <textarea name="cont_responsabilidades" rows={2} className={field} />
-        </div>
+          <div>
+            <label className={label}>2. Asignación de recursos necesarios</label>
+            <textarea name="com_recursos" rows={2} className={field + " resize-y"} />
+          </div>
 
-        <div className="text-[#0073a4]">
-          <label className={label}>
-            4. Roles o funciones de los responsables
-          </label>
-          <textarea name="cont_roles" rows={2} className={field} />
-        </div>
+          <div>
+            <label className={label}>3. Asignación de responsabilidades</label>
+            <textarea
+              name="com_responsabilidades"
+              rows={2}
+              className={field + " resize-y"}
+            />
+          </div>
 
-        <div className="text-[#0073a4]">
-          <label className={label}>5. Estructura de respuesta (alertamiento)</label>
-          <textarea name="cont_estructura" rows={2} className={field} />
-        </div>
+          <div>
+            <label className={label}>
+              4. Roles o funciones de los responsables
+            </label>
+            <textarea name="com_roles" rows={2} className={field + " resize-y"} />
+          </div>
 
-        <div className="text-[#0073a4]">
-          <label className={label}>
-            6. Actividades a desarrollar en pruebas y simulacros
-          </label>
-          <textarea name="cont_actividades" rows={2} className={field} />
-        </div>
+          <div>
+            <label className={label}>5. Estructura de respuesta (alertamiento)</label>
+            <textarea
+              name="com_estructura"
+              rows={2}
+              className={field + " resize-y"}
+            />
+          </div>
 
-        <div className="text-[#0073a4]">
-          <label className={label}>
-            7. Frecuencias de pruebas y simulacros
-          </label>
-          <input
-            name="cont_frecuencias"
-            className={field}
-            placeholder="Mensual / Trimestral / Semestral / Anual..."
-          />
-        </div>
+          <div>
+            <label className={label}>
+              6. Actividades a desarrollar en pruebas y simulacros
+            </label>
+            <textarea
+              name="com_actividades"
+              rows={2}
+              className={field + " resize-y"}
+            />
+          </div>
 
-        <div className="text-[#0073a4]">
-          <label className={label}>
-            8. Resultados de las pruebas y simulacros
-          </label>
-          <textarea name="cont_resultados" rows={2} className={field} />
-        </div>
+          <div>
+            <label className={label}>
+              7. Frecuencias de pruebas y simulacros
+            </label>
+            <input
+              name="com_frecuencias"
+              className={field}
+              placeholder="Mensual / Trimestral / Semestral / Anual..."
+            />
+          </div>
 
-        <div className="text-[#0073a4]">
-          <label className={label}>
-            9. Monitoreo y evaluación del desempeño
-          </label>
-          <textarea name="cont_monitoreo" rows={2} className={field} />
-        </div>
+          <div>
+            <label className={label}>
+              8. Resultados de las pruebas y simulacros
+            </label>
+            <textarea
+              name="com_resultados"
+              rows={2}
+              className={field + " resize-y"}
+            />
+          </div>
 
-        {/* ================== ESTRATEGIA DE RECUPERACIÓN ================== */}
-        <div className="md:col-span-2">
-          <h2 className="text-xl font-semibold mt-4 mb-2">
-            Estrategias de recuperación
-          </h2>
-        </div>
+          <div>
+            <label className={label}>
+              9. Monitoreo y evaluación del desempeño
+            </label>
+            <textarea
+              name="com_monitoreo"
+              rows={2}
+              className={field + " resize-y"}
+            />
+          </div>
 
-        <div className="md:col-span-2 text-[#0073a4]">
-          <label className={label}>
-            1. Estrategias y soluciones de continuidad *
-          </label>
-          <textarea name="rec_soluciones" rows={3} className={field} />
-          {errors.rec_soluciones && (
-            <p className="text-sm text-red-600 mt-1">
-              {errors.rec_soluciones}
-            </p>
-          )}
-        </div>
-
-        <div className="text-[#0073a4]">
-          <label className={label}>2. Asignación de recursos necesarios</label>
-          <textarea name="rec_recursos" rows={2} className={field} />
-        </div>
-
-        <div className="text-[#0073a4]">
-          <label className={label}>3. Asignación de responsabilidades</label>
-          <textarea name="rec_responsabilidades" rows={2} className={field} />
-        </div>
-
-        <div className="text-[#0073a4]">
-          <label className={label}>
-            4. Roles o funciones de los responsables
-          </label>
-          <textarea name="rec_roles" rows={2} className={field} />
-        </div>
-
-        <div className="text-[#0073a4]">
-          <label className={label}>5. Estructura de respuesta (alertamiento)</label>
-          <textarea name="rec_estructura" rows={2} className={field} />
-        </div>
-
-        <div className="text-[#0073a4]">
-          <label className={label}>
-            6. Actividades a desarrollar en pruebas y simulacros
-          </label>
-          <textarea name="rec_actividades" rows={2} className={field} />
-        </div>
-
-        <div className="text-[#0073a4]">
-          <label className={label}>
-            7. Frecuencias de pruebas y simulacros
-          </label>
-          <input
-            name="rec_frecuencias"
-            className={field}
-            placeholder="Mensual / Trimestral / Semestral / Anual..."
-          />
-        </div>
-
-        <div className="text-[#0073a4]">
-          <label className={label}>
-            8. Resultados de las pruebas y simulacros
-          </label>
-          <textarea name="rec_resultados" rows={2} className={field} />
-        </div>
-
-        <div className="text-[#0073a4]">
-          <label className={label}>
-            9. Monitoreo y evaluación del desempeño
-          </label>
-          <textarea name="rec_monitoreo" rows={2} className={field} />
-        </div>
-
-        {/* ========== ESTRATEGIAS DE COMUNICACIÓN / DIVULGACIÓN ========== */}
-        <div className="md:col-span-2">
-          <h2 className="text-xl font-semibold mt-4 mb-2">
-            Estrategias de comunicación/divulgación
-          </h2>
-        </div>
-
-        <div className="md:col-span-2 text-[#0073a4]">
-          <label className={label}>
-            1. Estrategias y soluciones de continuidad *
-          </label>
-          <textarea name="com_soluciones" rows={3} className={field} />
-          {errors.com_soluciones && (
-            <p className="text-sm text-red-600 mt-1">
-              {errors.com_soluciones}
-            </p>
-          )}
-        </div>
-
-        <div className="text-[#0073a4]">
-          <label className={label}>2. Asignación de recursos necesarios</label>
-          <textarea name="com_recursos" rows={2} className={field} />
-        </div>
-
-        <div className="text-[#0073a4]">
-          <label className={label}>3. Asignación de responsabilidades</label>
-          <textarea name="com_responsabilidades" rows={2} className={field} />
-        </div>
-
-        <div className="text-[#0073a4]">
-          <label className={label}>
-            4. Roles o funciones de los responsables
-          </label>
-          <textarea name="com_roles" rows={2} className={field} />
-        </div>
-
-        <div className="text-[#0073a4]">
-          <label className={label}>5. Estructura de respuesta (alertamiento)</label>
-          <textarea name="com_estructura" rows={2} className={field} />
-        </div>
-
-        <div className="text-[#0073a4]">
-          <label className={label}>
-            6. Actividades a desarrollar en pruebas y simulacros
-          </label>
-          <textarea name="com_actividades" rows={2} className={field} />
-        </div>
-
-        <div className="text-[#0073a4]">
-          <label className={label}>
-            7. Frecuencias de pruebas y simulacros
-          </label>
-          <input
-            name="com_frecuencias"
-            className={field}
-            placeholder="Mensual / Trimestral / Semestral / Anual..."
-          />
-        </div>
-
-        <div className="text-[#0073a4]">
-          <label className={label}>
-            8. Resultados de las pruebas y simulacros
-          </label>
-          <textarea name="com_resultados" rows={2} className={field} />
-        </div>
-
-        <div className="text-[#0073a4]">
-          <label className={label}>
-            9. Monitoreo y evaluación del desempeño
-          </label>
-          <textarea name="com_monitoreo" rows={2} className={field} />
-        </div>
-
-        {/* Acciones */}
-        <div className="md:col-span-2 flex gap-3 mt-4">
-          <button
-            type="submit"
-            disabled={pending}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-60"
-            aria-busy={pending}
-          >
-            {pending ? "Guardando..." : "Guardar"}
-          </button>
-          <button
-            type="reset"
-            className="bg-yellow-600 text-white px-4 py-2 rounded disabled:opacity-50"
-          >
-            Limpiar
-          </button>
-        </div>
-      </form>
+          {/* Acciones */}
+          <div className="md:col-span-2 flex flex-col sm:flex-row gap-3 mt-4 justify-end">
+            <button
+              type="reset"
+              className="px-4 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition"
+              disabled={pending}
+            >
+              Limpiar
+            </button>
+            <button
+              type="submit"
+              disabled={pending}
+              className="
+                px-5 py-2.5 rounded-lg text-sm font-semibold text-white
+                bg-emerald-600 hover:bg-emerald-500
+                disabled:opacity-60 disabled:cursor-not-allowed
+                shadow-md shadow-emerald-500/25 transition
+              "
+              aria-busy={pending}
+            >
+              {pending ? "Guardando..." : "Guardar estrategias de continuidad"}
+            </button>
+          </div>
+        </form>
+      </div>
     </section>
   );
 }

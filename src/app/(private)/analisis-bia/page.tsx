@@ -31,6 +31,7 @@ export default function AnalisisBIA() {
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   const opciones = [
+    { id: "1", label: "Todo el departamento" },
     { id: "2", label: "Gerencia General" },
     { id: "3", label: "Gerencia Técnico Operativa" },
     { id: "4", label: "Departamento de Desarrollo Sostenible" },
@@ -49,6 +50,9 @@ export default function AnalisisBIA() {
     { id: "17", label: "Departamento de Recursos Humanos" },
     { id: "18", label: "Departamento de Servicios de Salud" },
     { id: "19", label: "Comité Institucional de Emergencias" },
+    { id: "20", label: "Departamento de Secretaria del Directorio" },
+    { id: "21", label: "Departamento de Servicios Parlamentarios" }, 
+    { id: "22", label: "Departamento de Servicios Técnicos" },
   ];
 
   const filtered = opciones.filter((op) =>
@@ -105,12 +109,26 @@ export default function AnalisisBIA() {
     load();
   }, [selected]);
 
+  // helper para color de badge de prioridad
+  const prioridadColor = (p: string) => {
+    const v = p.toLowerCase();
+    if (v.includes("alta")) return "bg-red-100 text-red-700 border-red-300";
+    if (v.includes("media")) return "bg-yellow-100 text-yellow-800 border-yellow-300";
+    if (v.includes("baja")) return "bg-emerald-100 text-emerald-700 border-emerald-300";
+    return "bg-gray-100 text-gray-700 border-gray-300";
+  };
+
   return (
     <section className="text-black">
-      <h1 className="text-3xl font-bold mb-6">Mostrar Análisis BIA</h1>
+      <h1 className="text-3xl font-bold mb-2">Mostrar Análisis BIA</h1>
 
-      <p className="text-sm text-gray-600 mb-4">
-        Departamento: {selected ? selectedLabel : "Ninguno"} — Registros: {rows.length}
+      <p className="text-sm text-gray-600 mb-6">
+        Departamento:{" "}
+        <span className="font-medium">
+          {selected ? selectedLabel : "Ninguno"}
+        </span>{" "}
+        — Registros:{" "}
+        <span className="font-medium">{rows.length}</span>
       </p>
 
       {/* Combobox Moderno */}
@@ -205,83 +223,156 @@ export default function AnalisisBIA() {
         <p className="mb-3 text-gray-600">Cargando…</p>
       )}
 
-      {/* TABLA */}
-      <div className="w-full overflow-x-auto border rounded">
-        <table className="min-w-[1200px] w-full border-collapse">
-          <thead>
-            <tr className="bg-[#0073a4] text-white text-[13px]">
-              <th className="border px-2 py-2 text-left">
-                Área de la Gerencia o Departamento
-              </th>
-              <th className="border px-2 py-2 text-left">
-                Nombre del Proceso Crítico
-              </th>
-              <th className="border px-2 py-2 text-left">
-                Descripción
-              </th>
-              <th className="border px-2 py-2 text-left">Entradas</th>
-              <th className="border px-2 py-2 text-left">Salidas</th>
-              <th className="border px-2 py-2 text-left">Partes interesadas</th>
-              <th className="border px-2 py-2 text-left">Sincronización</th>
-              <th className="border px-2 py-2 text-center" colSpan={3}>
-                Marco de tiempo de recuperación
-              </th>
-              <th className="border px-2 py-2 text-left">Recursos</th>
-              <th className="border px-2 py-2 text-left">Requisitos</th>
-              <th className="border px-2 py-2 text-left">Tipo impacto</th>
-              <th className="border px-2 py-2 text-left">Descripción impacto</th>
-              <th className="border px-2 py-2 text-left">Prioridad</th>
-            </tr>
+      {/* 🔥 VISTA MODERNA: TARJETAS EN LUGAR DE TABLA */}
+      {rows.length > 0 ? (
+        <div className="space-y-4">
+          {rows.map((r, index) => (
+            <article
+              key={index}
+              className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden"
+            >
+              {/* Header de la tarjeta */}
+              <header className="px-4 py-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between bg-slate-50 border-b border-gray-200">
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    {r.area || "Área no especificada"}
+                  </p>
+                  <h2 className="text-lg font-semibold text-slate-900">
+                    {r.nombre}
+                  </h2>
+                </div>
 
-            <tr className="bg-[#0073a4] text-white text-[12px]">
-              {Array.from({ length: 7 }).map((_, i) => (
-                <th key={i} className="border px-2 py-1"></th>
-              ))}
-              <th className="border px-2 py-1 text-center">RTO</th>
-              <th className="border px-2 py-1 text-center">MTPD</th>
-              <th className="border px-2 py-1 text-center">RPO</th>
-              {Array.from({ length: 5 }).map((_, i) => (
-                <th key={`sub-${i}`} className="border px-2 py-1"></th>
-              ))}
-            </tr>
-          </thead>
+                <div className="flex flex-wrap gap-2">
+                  {r.tipoImpacto && (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full border text-xs font-medium bg-sky-50 border-sky-200 text-sky-700">
+                      Impacto: {r.tipoImpacto}
+                    </span>
+                  )}
+                  {r.prioridad && (
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-full border text-xs font-semibold ${prioridadColor(
+                        r.prioridad
+                      )}`}
+                    >
+                      Prioridad: {r.prioridad}
+                    </span>
+                  )}
+                </div>
+              </header>
 
-          <tbody className="text-[13px]">
-            {rows.length > 0 ? (
-              rows.map((r, index) => (
-                <tr key={index} className="odd:bg-white even:bg-gray-50">
-                  <td className="border px-2 py-2">{r.area}</td>
-                  <td className="border px-2 py-2">{r.nombre}</td>
-                  <td className="border px-2 py-2">{r.descripcion}</td>
-                  <td className="border px-2 py-2">{r.entradas}</td>
-                  <td className="border px-2 py-2">{r.salidas}</td>
-                  <td className="border px-2 py-2">{r.partes}</td>
-                  <td className="border px-2 py-2">{r.sincronizacion}</td>
-                  <td className="border px-2 py-2 text-center">{r.rto}</td>
-                  <td className="border px-2 py-2 text-center">{r.mtpd}</td>
-                  <td className="border px-2 py-2 text-center">{r.rpo}</td>
-                  <td className="border px-2 py-2">{r.recursos}</td>
-                  <td className="border px-2 py-2">{r.requisitos}</td>
-                  <td className="border px-2 py-2">{r.tipoImpacto}</td>
-                  <td className="border px-2 py-2">{r.descImpacto}</td>
-                  <td className="border px-2 py-2">{r.prioridad}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan={15}
-                  className="border px-4 py-6 text-center text-gray-500 italic bg-gray-50"
-                >
-                  {selected
-                    ? "No hay registros de análisis BIA para este departamento."
-                    : "Seleccione un departamento para ver datos."}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              {/* Contenido */}
+              <div className="px-4 py-3 grid gap-4 md:grid-cols-2">
+                {/* Columna izquierda */}
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                      Descripción del proceso crítico
+                    </h3>
+                    <p className="text-slate-800 whitespace-pre-line">
+                      {r.descripcion || "Sin descripción registrada."}
+                    </p>
+                  </div>
+
+                  <div className="grid gap-2 md:grid-cols-2">
+                    <div>
+                      <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                        Entradas
+                      </h3>
+                      <p className="text-slate-800 whitespace-pre-line">
+                        {r.entradas || "—"}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                        Salidas
+                      </h3>
+                      <p className="text-slate-800 whitespace-pre-line">
+                        {r.salidas || "—"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                      Partes interesadas (usuarios)
+                    </h3>
+                    <p className="text-slate-800 whitespace-pre-line">
+                      {r.partes || "—"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Columna derecha */}
+                <div className="space-y-3 text-sm">
+                  <div className="grid gap-2 md:grid-cols-3">
+                    <div>
+                      <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                        RTO
+                      </h3>
+                      <p className="text-slate-800">{r.rto || "—"}</p>
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                        MTPD
+                      </h3>
+                      <p className="text-slate-800">{r.mtpd || "—"}</p>
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                        RPO
+                      </h3>
+                      <p className="text-slate-800">{r.rpo || "—"}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                      Sincronización con otros procesos
+                    </h3>
+                    <p className="text-slate-800 whitespace-pre-line">
+                      {r.sincronizacion || "—"}
+                    </p>
+                  </div>
+
+                  <div className="grid gap-2 md:grid-cols-2">
+                    <div>
+                      <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                        Recursos necesarios
+                      </h3>
+                      <p className="text-slate-800 whitespace-pre-line">
+                        {r.recursos || "—"}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                        Requisitos legales y normativos
+                      </h3>
+                      <p className="text-slate-800 whitespace-pre-line">
+                        {r.requisitos || "—"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                      Descripción del impacto
+                    </h3>
+                    <p className="text-slate-800 whitespace-pre-line">
+                      {r.descImpacto || "—"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="mt-6 border rounded-xl bg-gray-50 px-4 py-6 text-center text-gray-500 italic">
+          {selected
+            ? "No hay registros de análisis BIA para este departamento."
+            : "Seleccione un departamento para ver datos."}
+        </div>
+      )}
     </section>
   );
 }
