@@ -29,6 +29,11 @@ export default function Sidebar() {
       icon: <Workflow size={18} />,
     },
     {
+      href: "/lista",
+      label: "Mostrar Plan de Acción",
+      icon: <PlusCircle size={18} />,
+    },
+    {
       href: "/proceso-critico",
       label: "Insertar Proceso Crítico",
       icon: <ClipboardCheck size={18} />,
@@ -36,6 +41,11 @@ export default function Sidebar() {
     {
       href: "/continuidad",
       label: "Insertar Estrategias de Continuidad",
+      icon: <PlusCircle size={18} />,
+    },
+    {
+      href: "/plan",
+      label: "Insertar Plan de Acción",
       icon: <PlusCircle size={18} />,
     },
   ];
