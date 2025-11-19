@@ -69,7 +69,7 @@ export default function PlanListaPage() {
       <div className="max-w-7xl mx-auto space-y-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
-            Planes de Intervención
+            Planes de Acción
           </h1>
           <p className="text-sm text-slate-600 mt-1">
             Consulta las acciones, marco de legalidad, coordinación y
