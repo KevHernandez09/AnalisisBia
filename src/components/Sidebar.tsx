@@ -72,7 +72,7 @@ export default function Sidebar() {
         </div>
 
         <h1 className="text-sm font-semibold uppercase tracking-wide text-white/80">
-          Menú - BIA
+          Menú - GRMJ
         </h1>
       </div>
 

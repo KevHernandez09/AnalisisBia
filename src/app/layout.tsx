@@ -3,7 +3,7 @@ import "./globals.css";
 import type { ReactNode } from "react";
 
 export const metadata = {
-  title: "Sistema BIA",
+  title: "WRMJ",
   description: "Gestión de Análisis BIA y Procesos Críticos",
 };
 
