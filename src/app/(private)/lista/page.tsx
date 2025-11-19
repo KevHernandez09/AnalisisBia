@@ -191,10 +191,10 @@ export default function PlanListaPage() {
                       className="border-t border-slate-200 px-4 py-8 text-center text-slate-500 text-sm bg-white"
                     >
                       {loading
-                        ? "Cargando planes de intervención…"
+                        ? "Cargando planes de acción"
                         : search
                         ? "No hay planes que coincidan con el criterio de búsqueda."
-                        : "No hay planes de intervención registrados aún."}
+                        : "No hay planes de acción registrados aún."}
                     </td>
                   </tr>
                 )}
