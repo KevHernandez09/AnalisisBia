@@ -18,7 +18,7 @@ type PlanRow = {
 
 const planes = [
   { id: "1", label: "Comisión Institucional de Presupuesto" },
-  { id: "2", label: "CISAAL" },
+  { id: "2", label: "CISAAL"},
 ];
 
 export default function PlanListaPage() {
