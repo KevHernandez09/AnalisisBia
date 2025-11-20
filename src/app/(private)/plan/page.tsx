@@ -9,9 +9,10 @@ import {
 } from "react";
 
 const planes = [
-  { id: "1", label: "Plan de Acción General" },
-  { id: "2", label: "Plan de Recuperación" },
-  { id: "3", label: "Plan de Comunicaciones" },
+  { id: "1", label: "Comisión Institucional de Presupuesto" },
+  { id: "2", label: "CISAAL" },
+
+  
 ];
 
 export default function PlanPage() {
@@ -228,7 +229,7 @@ export default function PlanPage() {
             )}
           </div>
 
-          {planError && (
+          {planError && ( 
             <p className="text-xs text-red-600 mt-1">{planError}</p>
           )}
         </div>
@@ -281,9 +282,9 @@ export default function PlanPage() {
         {/* Área de contacto */}
         <div>
           <label className={label}>Área de contacto</label>
-          <input
+          <textarea
             name="areaContacto"
-            className={input}
+            className={textarea}
             placeholder="Ej.: Departamento de Protocolo, CIE, RRHH…"
           />
         </div>

@@ -17,9 +17,8 @@ type PlanRow = {
 };
 
 const planes = [
-  { id: "1", label: "Plan de Acción General" },
-  { id: "2", label: "Plan de Recuperación" },
-  { id: "3", label: "Plan de Comunicaciones" },
+  { id: "1", label: "Comisión Institucional de Presupuesto" },
+  { id: "2", label: "CISAAL" },
 ];
 
 export default function PlanListaPage() {
@@ -240,7 +239,6 @@ export default function PlanListaPage() {
                   <th className="px-4 py-3 text-left">
                     Requerimientos para la intervención
                   </th>
-                  <th className="px-4 py-3 text-left">Fecha</th>
                 </tr>
               </thead>
 
@@ -277,14 +275,6 @@ export default function PlanListaPage() {
                       </td>
                       <td className="px-4 py-3 whitespace-pre-line leading-snug">
                         {row.requerimientos}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">
-                        {row.createdAt
-                          ? new Date(row.createdAt).toLocaleString("es-CR", {
-                            dateStyle: "short",
-                            timeStyle: "short",
-                          })
-                          : "—"}
                       </td>
                     </tr>
                   ))
