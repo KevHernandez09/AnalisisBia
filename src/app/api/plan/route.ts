@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import { z } from "zod";
 
 const prisma = new PrismaClient();
-// 👇 pequeño helper para saltarse el problema de tipos desactualizados
+// 👇 usamos any para esquivar el cliente desactualizado de Prisma en tiempo de compilación
 const prismaAny = prisma as any;
 
 const PlanAccionSchema = z.object({
@@ -22,7 +22,6 @@ export async function GET(req: NextRequest) {
   try {
     const planId = req.nextUrl.searchParams.get("planId") ?? undefined;
 
-    // 👇 usamos prismaAny para evitar el error de tipos
     const acciones = await prismaAny.planAccion.findMany({
       where: planId ? { planId } : undefined,
       orderBy: { createdAt: "desc" },
@@ -66,7 +65,7 @@ export async function POST(req: NextRequest) {
     const data = parsed.data;
 
     // Validar que el plan exista
-    const plan = await prisma.plan.findUnique({
+    const plan = await prismaAny.plan.findUnique({
       where: { id: data.planId },
     });
 
@@ -77,7 +76,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 👇 idem aquí, prismaAny
     const created = await prismaAny.planAccion.create({
       data: {
         planId: data.planId,
