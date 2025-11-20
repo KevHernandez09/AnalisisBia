@@ -1,10 +1,12 @@
 // app/plan/lista/page.tsx
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type PlanRow = {
   id: string;
+  planId?: string;
+  planNombre?: string;
   acciones: string;
   marcoLegalidad: string;
   afectacionMarco: string;
@@ -14,19 +16,59 @@ type PlanRow = {
   createdAt?: string;
 };
 
+const planes = [
+  { id: "1", label: "Plan de Acción General" },
+  { id: "2", label: "Plan de Recuperación" },
+  { id: "3", label: "Plan de Comunicaciones" },
+];
+
 export default function PlanListaPage() {
   const [rows, setRows] = useState<PlanRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
+  const [openPlan, setOpenPlan] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<string>("");
+
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  const selectedPlanLabel =
+    selectedPlan && planes.find((p) => p.id === selectedPlan)?.label
+      ? planes.find((p) => p.id === selectedPlan)!.label
+      : "Seleccione un plan";
+
+  // Cerrar dropdown al hacer click fuera
+  useEffect(() => {
+    function handleClickOutside(ev: MouseEvent) {
+      if (!dropdownRef.current) return;
+      if (!dropdownRef.current.contains(ev.target as Node)) {
+        setOpenPlan(false);
+      }
+    }
+
+    if (openPlan) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openPlan]);
+
+  // Cargar datos según el plan seleccionado
   useEffect(() => {
     async function load() {
+      if (!selectedPlan) {
+        setRows([]);
+        return;
+      }
+
       try {
         setLoading(true);
         setErr(null);
 
-        const res = await fetch("/api/plan", { cache: "no-store" });
+        const res = await fetch(`/api/plan?planId=${selectedPlan}`, {
+          cache: "no-store",
+        });
+
         if (!res.ok) {
           const j = await res.json().catch(() => ({}));
           throw new Error(j?.error || "Error al consultar los planes");
@@ -44,7 +86,7 @@ export default function PlanListaPage() {
     }
 
     load();
-  }, []);
+  }, [selectedPlan]);
 
   const filteredRows = useMemo(() => {
     if (!search.trim()) return rows;
@@ -72,114 +114,176 @@ export default function PlanListaPage() {
             Planes de Acción
           </h1>
           <p className="text-sm text-slate-600 mt-1">
-            Consulta las acciones, marco de legalidad, coordinación y
-            requerimientos definidos para cada plan.
+            Consulte las acciones registradas según el plan seleccionado.
           </p>
         </div>
 
         {/* Card principal */}
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/80 overflow-hidden">
-          {/* Header de la card */}
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between px-4 md:px-6 py-4 bg-gradient-to-r from-sky-700 to-sky-600 text-white">
-            <div>
+          {/* Header */}
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between px-4 md:px-6 py-4 bg-gradient-to-r from-sky-700 to-sky-600 text-white">
+            <div className="space-y-1">
               <h2 className="text-lg font-semibold">
-                Listado de planes registrados
+                Listado de acciones del plan
               </h2>
-              <p className="text-xs md:text-[13px] text-sky-100 mt-0.5">
-                {loading
-                  ? "Cargando información…"
-                  : `Total: ${rows.length} plan${
-                      rows.length === 1 ? "" : "es"
-                    } registrados`}
-              </p>
+              {selectedPlan ? (
+                <p className="text-xs md:text-[13px] text-sky-100">
+                  {loading
+                    ? "Cargando información…"
+                    : `Total: ${rows.length} registro${rows.length === 1 ? "" : "s"
+                    } en ${selectedPlanLabel}`}
+                </p>
+              ) : (
+                <p className="text-xs text-sky-200">
+                  Seleccione un plan para visualizar la información.
+                </p>
+              )}
+
+              {err && <p className="text-xs text-red-100">Error: {err}</p>}
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Buscar por acciones, área, marco..."
-                  className="w-64 max-w-xs rounded-full bg-white/10 border border-white/40 px-9 py-1.5 text-xs md:text-sm placeholder-white/70 text-white outline-none focus:bg-white/15 focus:border-white focus:ring-1 focus:ring-white/80 transition"
-                />
-                <span className="absolute left-2.5 top-1.5 md:top-1.5 text-xs md:text-sm text-white/80">
-                  🔍
-                </span>
+            <div className="flex flex-col md:flex-row gap-3 md:items-center">
+              {/* Combobox minimalista */}
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setOpenPlan((p) => !p)}
+                  className="
+                    w-full md:w-64 flex items-center justify-between
+                    px-3 py-2.5 rounded-full bg-white/10 border border-white/40
+                    hover:bg-white/15 hover:border-white/80
+                    focus:outline-none focus:ring-2 focus:ring-white/60
+                    text-xs md:text-sm font-medium text-white
+                    transition-all
+                  "
+                >
+                  <span className="truncate">{selectedPlanLabel}</span>
+
+                  <svg
+                    className={`w-4 h-4 text-white/80 transition-transform ${openPlan ? "rotate-180" : "rotate-0"
+                      }`}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                {openPlan && (
+                  <div
+                    className="
+                      absolute mt-2 w-full md:w-64 bg-white border border-gray-200
+                      rounded-xl shadow-xl z-20 max-h-64 overflow-hidden
+                    "
+                  >
+                    <div className="max-h-56 overflow-y-auto text-sm">
+                      {planes.map((op) => (
+                        <div
+                          key={op.id}
+                          className={`
+                            px-4 py-2.5 cursor-pointer transition-all
+                            ${selectedPlan === op.id
+                              ? "bg-sky-50 text-sky-700 font-semibold"
+                              : "hover:bg-gray-100 text-gray-800"
+                            }
+                          `}
+                          onClick={() => {
+                            setSelectedPlan(op.id);
+                            setOpenPlan(false);
+                          }}
+                        >
+                          {op.label}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <span className="hidden md:inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-[11px] uppercase tracking-[0.12em]">
-                {filteredRows.length} resultado
-                {filteredRows.length === 1 ? "" : "s"}
-              </span>
+              {/* Buscador dentro del plan seleccionado */}
+              <div className="flex items-center gap-3">
+                <span className="hidden md:inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-[11px] uppercase tracking-[0.12em]">
+                  {filteredRows.length} resultado
+                  {filteredRows.length === 1 ? "" : "s"}
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Contenedor scrollable de la tabla */}
-          <div className="relative max-h-[540px] overflow-auto">
-            <table className="min-w-[1200px] w-full border-collapse">
-              <thead className="sticky top-0 z-10">
-                <tr className="text-[11px] md:text-[12px] uppercase tracking-[0.08em] bg-slate-50 text-slate-700 border-b border-slate-200">
-                  <th className="border-r border-slate-200 px-2 py-2 text-left">
-                    #
-                  </th>
-                  <th className="border-r border-slate-200 px-3 py-2 text-left">
-                    Acciones por ejecutar
-                  </th>
-                  <th className="border-r border-slate-200 px-3 py-2 text-left">
-                    Marco de Legalidad
-                  </th>
-                  <th className="border-r border-slate-200 px-3 py-2 text-left">
+          {/* Desktop: tabla moderna */}
+          <div className="hidden md:block relative max-h-[540px] overflow-auto rounded-xl border-t border-slate-200">
+            <table className="min-w-full text-sm text-slate-700">
+              <thead>
+                <tr
+                  className="
+                    bg-white/70 backdrop-blur
+                    sticky top-0 z-10
+                    text-[11px] font-semibold uppercase tracking-wide
+                    border-b border-slate-200
+                  "
+                >
+                  <th className="px-4 py-3 text-left">Acciones por ejecutar</th>
+                  <th className="px-4 py-3 text-left">Marco de Legalidad</th>
+                  <th className="px-4 py-3 text-left">
                     Afectación del Marco de Legalidad
                   </th>
-                  <th className="border-r border-slate-200 px-3 py-2 text-left">
+                  <th className="px-4 py-3 text-left">
                     Coordinación interna y/o externa
                   </th>
-                  <th className="border-r border-slate-200 px-3 py-2 text-left">
-                    Área de Contacto
-                  </th>
-                  <th className="border-r border-slate-200 px-3 py-2 text-left">
+                  <th className="px-4 py-3 text-left">Área de Contacto</th>
+                  <th className="px-4 py-3 text-left">
                     Requerimientos para la intervención
                   </th>
-                  <th className="px-3 py-2 text-left">Fecha de registro</th>
+                  <th className="px-4 py-3 text-left">Fecha</th>
                 </tr>
               </thead>
 
-              <tbody className="text-[12px] md:text-[13px]">
-                {filteredRows.length > 0 ? (
+              <tbody className="divide-y divide-slate-200">
+                {!selectedPlan ? (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className="px-4 py-10 text-center text-slate-500 text-sm bg-white"
+                    >
+                      Seleccione un plan para ver los registros.
+                    </td>
+                  </tr>
+                ) : filteredRows.length > 0 ? (
                   filteredRows.map((row, idx) => (
                     <tr
                       key={row.id ?? idx}
-                      className="align-top odd:bg-white even:bg-slate-50/70 hover:bg-sky-50 transition-colors"
+                      className="hover:bg-sky-50/60 transition-colors bg-white"
                     >
-                      <td className="border-t border-slate-200 border-r px-2 py-2 text-slate-500 text-center text-xs">
-                        {idx + 1}
-                      </td>
-
-                      <td className="border-t border-slate-200 border-r px-3 py-2 whitespace-pre-line leading-snug">
+                      <td className="px-4 py-3 whitespace-pre-line leading-snug">
                         {row.acciones}
                       </td>
-                      <td className="border-t border-slate-200 border-r px-3 py-2 whitespace-pre-line leading-snug">
+                      <td className="px-4 py-3 whitespace-pre-line leading-snug">
                         {row.marcoLegalidad}
                       </td>
-                      <td className="border-t border-slate-200 border-r px-3 py-2 whitespace-pre-line leading-snug">
+                      <td className="px-4 py-3 whitespace-pre-line leading-snug">
                         {row.afectacionMarco}
                       </td>
-                      <td className="border-t border-slate-200 border-r px-3 py-2 whitespace-pre-line leading-snug">
+                      <td className="px-4 py-3 whitespace-pre-line leading-snug">
                         {row.coordinacion}
                       </td>
-                      <td className="border-t border-slate-200 border-r px-3 py-2 whitespace-pre-line leading-snug">
+                      <td className="px-4 py-3 whitespace-pre-line leading-snug">
                         {row.areaContacto}
                       </td>
-                      <td className="border-t border-slate-200 border-r px-3 py-2 whitespace-pre-line leading-snug">
+                      <td className="px-4 py-3 whitespace-pre-line leading-snug">
                         {row.requerimientos}
                       </td>
-                      <td className="border-t border-slate-200 px-3 py-2 text-slate-600 whitespace-nowrap text-xs md:text-[12px]">
+                      <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">
                         {row.createdAt
                           ? new Date(row.createdAt).toLocaleString("es-CR", {
-                              dateStyle: "short",
-                              timeStyle: "short",
-                            })
+                            dateStyle: "short",
+                            timeStyle: "short",
+                          })
                           : "—"}
                       </td>
                     </tr>
@@ -187,19 +291,110 @@ export default function PlanListaPage() {
                 ) : (
                   <tr>
                     <td
-                      colSpan={8}
-                      className="border-t border-slate-200 px-4 py-8 text-center text-slate-500 text-sm bg-white"
+                      colSpan={7}
+                      className="px-4 py-10 text-center text-slate-500 text-sm bg-white"
                     >
                       {loading
-                        ? "Cargando planes de acción"
-                        : search
-                        ? "No hay planes que coincidan con el criterio de búsqueda."
-                        : "No hay planes de acción registrados aún."}
+                        ? "Cargando planes…"
+                        : "No hay registros para este plan."}
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile: cards en lugar de tabla */}
+          <div className="block md:hidden border-t border-slate-200">
+            {!selectedPlan ? (
+              <div className="px-4 py-8 text-center text-slate-500 text-sm bg-white">
+                Seleccione un plan para ver los registros.
+              </div>
+            ) : filteredRows.length > 0 ? (
+              <div className="p-4 space-y-4">
+                {filteredRows.map((row, idx) => (
+                  <article
+                    key={row.id ?? idx}
+                    className="
+                      rounded-xl border border-slate-200 bg-white
+                      shadow-xs shadow-slate-200/70
+                      p-4 space-y-3
+                    "
+                  >
+                    <header className="flex items-start justify-between gap-3">
+                      <h3 className="text-[13px] font-semibold text-slate-900">
+                        Acciones por ejecutar
+                      </h3>
+                      <span className="text-[11px] text-slate-500">
+                        {row.createdAt
+                          ? new Date(row.createdAt).toLocaleString("es-CR", {
+                            dateStyle: "short",
+                            timeStyle: "short",
+                          })
+                          : "—"}
+                      </span>
+                    </header>
+
+                    <p className="text-[13px] text-slate-800 whitespace-pre-line">
+                      {row.acciones}
+                    </p>
+
+                    <dl className="space-y-2 text-[12px]">
+                      <div>
+                        <dt className="font-semibold text-slate-700">
+                          Marco de Legalidad
+                        </dt>
+                        <dd className="text-slate-700 whitespace-pre-line">
+                          {row.marcoLegalidad || "—"}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt className="font-semibold text-slate-700">
+                          Afectación del Marco de Legalidad
+                        </dt>
+                        <dd className="text-slate-700 whitespace-pre-line">
+                          {row.afectacionMarco || "—"}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt className="font-semibold text-slate-700">
+                          Coordinación interna y/o externa
+                        </dt>
+                        <dd className="text-slate-700 whitespace-pre-line">
+                          {row.coordinacion || "—"}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt className="font-semibold text-slate-700">
+                          Área de Contacto
+                        </dt>
+                        <dd className="text-slate-700 whitespace-pre-line">
+                          {row.areaContacto || "—"}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt className="font-semibold text-slate-700">
+                          Requerimientos para la intervención
+                        </dt>
+                        <dd className="text-slate-700 whitespace-pre-line">
+                          {row.requerimientos || "—"}
+                        </dd>
+                      </div>
+                    </dl>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="px-4 py-8 text-center text-slate-500 text-sm bg-white">
+                {loading
+                  ? "Cargando planes…"
+                  : "No hay registros para este plan."}
+              </div>
+            )}
           </div>
         </div>
       </div>

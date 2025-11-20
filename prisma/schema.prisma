@@ -134,3 +134,30 @@ model EstrategiaArea {
 
   @@id([estrategiaId, areaId])
 }
+
+model Plan {
+  id          String       @id @default(cuid())
+  nombre      String
+  descripcion String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  acciones    PlanAccion[]
+}
+
+model PlanAccion {
+  id              String   @id @default(cuid())
+
+  planId          String
+  plan            Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  acciones        String
+  marcoLegalidad  String
+  afectacionMarco String
+  coordinacion    String
+  areaContacto    String
+  requerimientos  String
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

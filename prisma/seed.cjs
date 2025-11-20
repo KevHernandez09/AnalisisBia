@@ -1,57 +1,40 @@
 // prisma/seed.cjs
-/* eslint-disable no-console */
 const { PrismaClient } = require("@prisma/client");
-const bcrypt = require("bcryptjs"); // 👈 aquí el cambio
-
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Iniciando seed de base de datos...");
+  console.log("🌱 Iniciando seed de planes...");
 
-  const plainPassword = "admin123";
-  const passwordHash = await bcrypt.hash(plainPassword, 10);
-
-  await prisma.user.upsert({
-    where: { email: "admin@institucion.go.cr" },
-    update: {},
-    create: {
-      email: "admin@institucion.go.cr",
-      name: "Administrador",
-      passwordHash,
+  const planesData = [
+    {
+      id: "1",
+      nombre: "Plan de Acción General",
+      descripcion: "Plan general de acciones ante incidentes",
     },
-  });
-
-  const areas = [
-    { id: "1", label: "Todo el departamento" },
-    { id: "2", label: "Gerencia General" },
-    { id: "3", label: "Gerencia Técnico Operativa" },
-    { id: "4", label: "Departamento de Desarrollo Sostenible" },
-    { id: "5", label: "Departamento de Tecnologías de información" },
-    { id: "6", label: "Departamento de Protocolo" },
-    { id: "7", label: "Departamento de Asesoría Legal" },
-    { id: "8", label: "Departamento de Prensa Institucional" },
-    { id: "9", label: "Departamento de Seguridad Parlamentaria" },
-    { id: "10", label: "Departamento de Instituto de Formación e Investigación" },
-    { id: "11", label: "Departamento Análisis Presupuestario" },
-    { id: "12", label: "Departamento de Comisiones Legislativas" },
-    { id: "13", label: "Departamento de __________________" },
-    { id: "14", label: "Departamento de Financiero" },
-    { id: "15", label: "Departamento de Servicios Generales" },
-    { id: "16", label: "Departamento de Proveeduría" },
-    { id: "17", label: "Departamento de Recursos Humanos" },
-    { id: "18", label: "Departamento de Servicios de Salud" },
-    { id: "19", label: "Comité Institucional de Emergencias" },
+    {
+      id: "2",
+      nombre: "Plan de Recuperación",
+      descripcion: "Plan para la recuperación de servicios y procesos",
+    },
+    {
+      id: "3",
+      nombre: "Plan de Comunicaciones",
+      descripcion: "Plan para la gestión de comunicaciones internas y externas",
+    },
   ];
 
-  for (const a of areas) {
-    await prisma.area.upsert({
-      where: { id: a.id },
-      update: {},
-      create: a,
+  for (const p of planesData) {
+    await prisma.plan.upsert({
+      where: { id: p.id },
+      update: {
+        nombre: p.nombre,
+        descripcion: p.descripcion,
+      },
+      create: p,
     });
   }
 
-  console.log("✅ Seed finalizado correctamente.");
+  console.log("✅ Seed completado: Planes creados/actualizados.");
 }
 
 main()
