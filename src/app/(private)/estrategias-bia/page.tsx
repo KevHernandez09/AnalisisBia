@@ -3,9 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type StrategyRow = {
-  proceso: string;           // Nombre del Proceso Crítico
-  descripcion: string;       // Descripción del Proceso Crítico
-  tipo: string;              // Tipo de estrategia
+  id: string;            // 👈 NUEVO
+  proceso: string;       // Nombre del Proceso Crítico
+  descripcion: string;   // Descripción del Proceso Crítico
+  tipo: string;          // Tipo de estrategia
   soluciones: string;
   recursos: string;
   responsabilidades: string;
@@ -33,6 +34,12 @@ export default function EstrategiasContinuidadPage() {
   const [rows, setRows] = useState<StrategyRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [okMsg, setOkMsg] = useState<string | null>(null);
+
+  // edición
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<StrategyRow | null>(null);
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   const opciones = [
     { id: "2", label: "Gerencia General" },
@@ -92,6 +99,9 @@ export default function EstrategiasContinuidadPage() {
       try {
         setLoading(true);
         setErr(null);
+        setOkMsg(null);
+        setEditingId(null);
+        setDraft(null);
 
         const r = await fetch(
           `/api/estrategias?areaId=${encodeURIComponent(selected)}`,
@@ -161,11 +171,80 @@ export default function EstrategiasContinuidadPage() {
     }));
   }, [rows]);
 
+  // helpers edición
+  function handleDraftChange<K extends keyof StrategyRow>(field: K, value: StrategyRow[K]) {
+    setDraft((prev) => (prev ? { ...prev, [field]: value } : prev));
+  }
+
+  function startEdit(row: StrategyRow) {
+    setEditingId(row.id);
+    setDraft(row);
+    setErr(null);
+    setOkMsg(null);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setDraft(null);
+  }
+
+  async function saveEdit() {
+    if (!editingId || !draft) return;
+
+    try {
+      setSavingId(editingId);
+      setErr(null);
+      setOkMsg(null);
+
+      const payload = {
+        tipo: draft.tipo,
+        soluciones: draft.soluciones,
+        recursos: draft.recursos,
+        responsabilidades: draft.responsabilidades,
+        roles: draft.roles,
+        estructura: draft.estructura,
+        actividades: draft.actividades,
+        frecuencias: draft.frecuencias,
+        resultados: draft.resultados,
+        monitoreo: draft.monitoreo,
+      };
+
+      const res = await fetch(
+        `/api/estrategias/${encodeURIComponent(editingId)}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j?.error || "Error al actualizar estrategia");
+      }
+
+      // actualizar estado local
+      setRows((prev) =>
+        prev.map((row) =>
+          row.id === editingId ? { ...row, ...draft } : row,
+        ),
+      );
+
+      setOkMsg("Estrategia actualizada correctamente.");
+      setEditingId(null);
+      setDraft(null);
+    } catch (e: any) {
+      setErr(e?.message ?? "Error inesperado al actualizar");
+    } finally {
+      setSavingId(null);
+    }
+  }
+
   return (
     <section className="text-black px-6 pt-6">
       <h1 className="text-3xl font-bold mb-2">Estrategias de Continuidad</h1>
 
-      <p className="text-sm text-gray-600 mb-4">
+      <p className="text-sm text-gray-600 mb-2">
         Departamento:{" "}
         <span className="font-medium">
           {selected ? selectedLabel : "Ninguno"}
@@ -173,6 +252,18 @@ export default function EstrategiasContinuidadPage() {
         — Registros:{" "}
         <span className="font-medium">{rows.length}</span>
       </p>
+
+      {okMsg && (
+        <div className="mb-3 rounded bg-emerald-50 border border-emerald-300 text-emerald-800 px-3 py-2 text-sm">
+          {okMsg}
+        </div>
+      )}
+
+      {err && (
+        <div className="mb-3 rounded bg-red-50 border border-red-300 text-red-700 px-3 py-2 text-sm">
+          {err}
+        </div>
+      )}
 
       {/* 🔥 Combobox Moderno */}
       <div className="relative w-full max-w-lg mb-6" ref={dropdownRef}>
@@ -189,9 +280,8 @@ export default function EstrategiasContinuidadPage() {
         >
           <span>{selectedLabel}</span>
           <svg
-            className={`w-5 h-5 text-gray-500 transition-transform ${
-              open ? "rotate-180" : "rotate-0"
-            }`}
+            className={`w-5 h-5 text-gray-500 transition-transform ${open ? "rotate-180" : "rotate-0"
+              }`}
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
@@ -226,10 +316,9 @@ export default function EstrategiasContinuidadPage() {
                     key={op.id}
                     className={`
                       px-4 py-2.5 cursor-pointer text-sm transition-all
-                      ${
-                        selected === op.id
-                          ? "bg-[#0073a4]/10 text-[#0073a4] font-semibold"
-                          : "hover:bg-gray-100"
+                      ${selected === op.id
+                        ? "bg-[#0073a4]/10 text-[#0073a4] font-semibold"
+                        : "hover:bg-gray-100"
                       }
                     `}
                     onClick={() => {
@@ -250,12 +339,6 @@ export default function EstrategiasContinuidadPage() {
           </div>
         )}
       </div>
-
-      {err && (
-        <div className="mb-4 rounded bg-red-50 border border-red-300 text-red-700 px-3 py-2">
-          {err}
-        </div>
-      )}
 
       {loading && (
         <p className="mb-3 text-gray-600">Cargando estrategias…</p>
@@ -286,121 +369,288 @@ export default function EstrategiasContinuidadPage() {
 
               {/* Lista de estrategias */}
               <div className="px-4 py-3 space-y-3">
-                {g.estrategias.map((e, idx) => (
-                  <div
-                    key={`${g.key}-estrategia-${idx}`}
-                    className="rounded-lg border border-gray-200 bg-slate-50/60 px-3 py-3"
-                  >
-                    <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between mb-2">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                          Estrategia
-                        </p>
-                        <p className="text-sm text-slate-800 whitespace-pre-line">
-                          {e.soluciones || "Sin descripción de estrategia."}
-                        </p>
+                {g.estrategias.map((e) => {
+                  const isEditing = editingId === e.id;
+                  const data =
+                    isEditing && draft && draft.id === e.id ? draft : e;
+
+                  return (
+                    <div
+                      key={e.id}
+                      className="rounded-lg border border-gray-200 bg-slate-50/60 px-3 py-3"
+                    >
+                      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between mb-2">
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                Estrategia
+                              </p>
+                            </div>
+
+                            {/* Botones edición */}
+                            <div className="flex items-center gap-2">
+                              {isEditing ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={saveEdit}
+                                    disabled={savingId === e.id}
+                                    className="px-3 py-1 rounded-md bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-500 disabled:opacity-60"
+                                  >
+                                    {savingId === e.id ? "Guardando..." : "Guardar"}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={cancelEdit}
+                                    disabled={savingId === e.id}
+                                    className="px-3 py-1 rounded-md border border-gray-300 text-xs text-gray-700 hover:bg-gray-50"
+                                  >
+                                    Cancelar
+                                  </button>
+                                </>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => startEdit(e)}
+                                  className="px-3 py-1 rounded-md border border-gray-300 text-xs text-gray-700 hover:bg-gray-50"
+                                >
+                                  Editar
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* soluciones */}
+                          {isEditing ? (
+                            <textarea
+                              className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                              rows={3}
+                              value={data.soluciones}
+                              onChange={(ev) =>
+                                handleDraftChange("soluciones", ev.target.value)
+                              }
+                            />
+                          ) : (
+                            <p className="text-sm text-slate-800 whitespace-pre-line">
+                              {data.soluciones || "Sin descripción de estrategia."}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* tipo de estrategia */}
+                        <div className="mt-2 md:mt-0 md:ml-3 flex flex-col items-start gap-2">
+                          <span
+                            className={`
+                              inline-flex items-center px-3 py-1 rounded-full border
+                              text-xs font-semibold
+                              ${tipoBadge(data.tipo)}
+                            `}
+                          >
+                            {isEditing ? (
+                              <input
+                                className="bg-transparent outline-none text-xs"
+                                value={data.tipo}
+                                onChange={(ev) =>
+                                  handleDraftChange("tipo", ev.target.value)
+                                }
+                              />
+                            ) : (
+                              data.tipo
+                            )}
+                          </span>
+                        </div>
                       </div>
 
-                      {e.tipo && (
-                        <span
-                          className={`
-                            inline-flex items-center px-3 py-1 rounded-full border
-                            text-xs font-semibold mt-2 md:mt-0
-                            ${tipoBadge(e.tipo)}
-                          `}
-                        >
-                          {e.tipo}
-                        </span>
-                      )}
-                    </div>
+                      <div className="grid gap-3 md:grid-cols-2 text-sm">
+                        <div className="space-y-2">
+                          {/* Recursos */}
+                          <div>
+                            <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                              Recursos necesarios
+                            </h3>
+                            {isEditing ? (
+                              <textarea
+                                className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                                rows={2}
+                                value={data.recursos}
+                                onChange={(ev) =>
+                                  handleDraftChange("recursos", ev.target.value)
+                                }
+                              />
+                            ) : (
+                              <p className="text-slate-800 whitespace-pre-line">
+                                {data.recursos || "—"}
+                              </p>
+                            )}
+                          </div>
 
-                    <div className="grid gap-3 md:grid-cols-2 text-sm">
-                      <div className="space-y-2">
-                        <div>
-                          <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                            Recursos necesarios
-                          </h3>
-                          <p className="text-slate-800 whitespace-pre-line">
-                            {e.recursos || "—"}
-                          </p>
+                          {/* Responsables */}
+                          <div>
+                            <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                              Responsables
+                            </h3>
+                            {isEditing ? (
+                              <textarea
+                                className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                                rows={2}
+                                value={data.responsabilidades}
+                                onChange={(ev) =>
+                                  handleDraftChange(
+                                    "responsabilidades",
+                                    ev.target.value,
+                                  )
+                                }
+                              />
+                            ) : (
+                              <p className="text-slate-800 whitespace-pre-line">
+                                {data.responsabilidades || "—"}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Roles */}
+                          <div>
+                            <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                              Roles o funciones
+                            </h3>
+                            {isEditing ? (
+                              <textarea
+                                className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                                rows={2}
+                                value={data.roles}
+                                onChange={(ev) =>
+                                  handleDraftChange("roles", ev.target.value)
+                                }
+                              />
+                            ) : (
+                              <p className="text-slate-800 whitespace-pre-line">
+                                {data.roles || "—"}
+                              </p>
+                            )}
+                          </div>
                         </div>
 
-                        <div>
-                          <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                            Responsables
-                          </h3>
-                          <p className="text-slate-800 whitespace-pre-line">
-                            {e.responsabilidades || "—"}
-                          </p>
-                        </div>
+                        <div className="space-y-2">
+                          {/* Estructura */}
+                          <div>
+                            <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                              Estructura de respuesta (alertamiento)
+                            </h3>
+                            {isEditing ? (
+                              <textarea
+                                className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                                rows={2}
+                                value={data.estructura}
+                                onChange={(ev) =>
+                                  handleDraftChange("estructura", ev.target.value)
+                                }
+                              />
+                            ) : (
+                              <p className="text-slate-800 whitespace-pre-line">
+                                {data.estructura || "—"}
+                              </p>
+                            )}
+                          </div>
 
-                        <div>
-                          <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                            Roles o funciones
-                          </h3>
-                          <p className="text-slate-800 whitespace-pre-line">
-                            {e.roles || "—"}
-                          </p>
+                          {/* Actividades */}
+                          <div>
+                            <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                              Actividades en pruebas y simulacros
+                            </h3>
+                            {isEditing ? (
+                              <textarea
+                                className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                                rows={2}
+                                value={data.actividades}
+                                onChange={(ev) =>
+                                  handleDraftChange(
+                                    "actividades",
+                                    ev.target.value,
+                                  )
+                                }
+                              />
+                            ) : (
+                              <p className="text-slate-800 whitespace-pre-line">
+                                {data.actividades || "—"}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Frecuencias */}
+                          <div>
+                            <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                              Frecuencia de pruebas / simulacros
+                            </h3>
+                            {isEditing ? (
+                              <textarea
+                                className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                                rows={2}
+                                value={data.frecuencias}
+                                onChange={(ev) =>
+                                  handleDraftChange(
+                                    "frecuencias",
+                                    ev.target.value,
+                                  )
+                                }
+                              />
+                            ) : (
+                              <p className="text-slate-800 whitespace-pre-line">
+                                {data.frecuencias || "—"}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
 
-                      <div className="space-y-2">
-                        <div>
-                          <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                            Estructura de respuesta (alertamiento)
-                          </h3>
-                          <p className="text-slate-800 whitespace-pre-line">
-                            {e.estructura || "—"}
-                          </p>
-                        </div>
-
-                        <div>
-                          <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                            Actividades en pruebas y simulacros
-                          </h3>
-                          <p className="text-slate-800 whitespace-pre-line">
-                            {e.actividades || "—"}
-                          </p>
-                        </div>
-
-                        <div>
-                          <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                            Frecuencia de pruebas / simulacros
-                          </h3>
-                          <p className="text-slate-800 whitespace-pre-line">
-                            {e.frecuencias || "—"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {(e.resultados || e.monitoreo) && (
-                      <div className="mt-3 grid gap-2 md:grid-cols-2 text-sm">
-                        {e.resultados && (
+                      {(data.resultados || data.monitoreo) && (
+                        <div className="mt-3 grid gap-2 md:grid-cols-2 text-sm">
+                          {/* Resultados */}
                           <div>
                             <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
                               Resultados de pruebas / simulacros
                             </h3>
-                            <p className="text-slate-800 whitespace-pre-line">
-                              {e.resultados}
-                            </p>
+                            {isEditing ? (
+                              <textarea
+                                className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                                rows={2}
+                                value={data.resultados}
+                                onChange={(ev) =>
+                                  handleDraftChange("resultados", ev.target.value)
+                                }
+                              />
+                            ) : (
+                              <p className="text-slate-800 whitespace-pre-line">
+                                {data.resultados || "—"}
+                              </p>
+                            )}
                           </div>
-                        )}
 
-                        {e.monitoreo && (
+                          {/* Monitoreo */}
                           <div>
                             <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
                               Monitoreo y mejora continua
                             </h3>
-                            <p className="text-slate-800 whitespace-pre-line">
-                              {e.monitoreo}
-                            </p>
+                            {isEditing ? (
+                              <textarea
+                                className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                                rows={2}
+                                value={data.monitoreo}
+                                onChange={(ev) =>
+                                  handleDraftChange("monitoreo", ev.target.value)
+                                }
+                              />
+                            ) : (
+                              <p className="text-slate-800 whitespace-pre-line">
+                                {data.monitoreo || "—"}
+                              </p>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </article>
           ))}

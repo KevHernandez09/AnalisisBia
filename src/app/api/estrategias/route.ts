@@ -1,3 +1,4 @@
+// app/api/estrategias/route.ts
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "../../../../lib/prisma";
@@ -29,7 +30,8 @@ const BodySchema = z.object({
 });
 
 // Tipo de respuesta para la tabla
-type StrategyRow = {
+export type StrategyRow = {
+  id: string;             // 👈 NUEVO
   proceso: string;
   descripcion: string;
   tipo: string;
@@ -44,7 +46,7 @@ type StrategyRow = {
   monitoreo: string;
 };
 
-// ============ POST: crear las 4 estrategias ============
+// ============ POST: crear las estrategias ============
 
 export async function POST(req: Request) {
   try {
@@ -147,6 +149,7 @@ export async function GET(req: Request) {
         },
       },
       select: {
+        id: true,                    // 👈 NUEVO
         nombreProceso: true,
         descripcionProceso: true,
         tipo: true,
@@ -166,6 +169,7 @@ export async function GET(req: Request) {
     });
 
     const rows: StrategyRow[] = estrategias.map((e) => ({
+      id: e.id,
       proceso: e.nombreProceso,
       descripcion: e.descripcionProceso,
       tipo: e.tipo,
