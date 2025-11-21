@@ -242,7 +242,7 @@ export default function EstrategiasContinuidadPage() {
 
   return (
     <section className="text-black px-6 pt-6">
-      <h1 className="text-3xl font-bold mb-2">Estrategias de Continuidad</h1>
+      <h1 className="text-3xl font-bold text-black mb-2">Estrategias de Continuidad</h1>
 
       <p className="text-sm text-gray-600 mb-2">
         Departamento:{" "}
@@ -353,15 +353,15 @@ export default function EstrategiasContinuidadPage() {
               className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden"
             >
               {/* Header proceso */}
-              <header className="px-4 py-3 border-b border-gray-200 bg-slate-50">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">
+              <header className="px-4 py-3 border-b border-gray-200 bg-[#0073a4]">
+                <p className="text-xs font-semibold uppercase tracking-wide text-white mb-1">
                   Proceso crítico
                 </p>
-                <h2 className="text-lg font-semibold text-slate-900">
+                <h2 className="text-lg font-semibold text-white">
                   {g.proceso || "Sin nombre de proceso"}
                 </h2>
                 {g.descripcion && (
-                  <p className="mt-1 text-sm text-slate-700 whitespace-pre-line">
+                  <p className="mt-1 text-sm text-white whitespace-pre-line">
                     {g.descripcion}
                   </p>
                 )}
@@ -383,7 +383,7 @@ export default function EstrategiasContinuidadPage() {
                         <div className="flex-1">
                           <div className="flex items-center justify-between gap-2 mb-1">
                             <div>
-                              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                              <p className="text-xs font-semibold uppercase tracking-wide text-[#0073a4]">
                                 Estrategia
                               </p>
                             </div>
@@ -466,7 +466,7 @@ export default function EstrategiasContinuidadPage() {
                         <div className="space-y-2">
                           {/* Recursos */}
                           <div>
-                            <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                            <h3 className="text-xs font-semibold  text-[#0073a4] uppercase mb-1">
                               Recursos necesarios
                             </h3>
                             {isEditing ? (
@@ -487,7 +487,7 @@ export default function EstrategiasContinuidadPage() {
 
                           {/* Responsables */}
                           <div>
-                            <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                            <h3 className="text-xs font-semibold  text-[#0073a4] uppercase mb-1">
                               Responsables
                             </h3>
                             {isEditing ? (
@@ -511,7 +511,7 @@ export default function EstrategiasContinuidadPage() {
 
                           {/* Roles */}
                           <div>
-                            <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                            <h3 className="text-xs font-semibold  text-[#0073a4] uppercase mb-1">
                               Roles o funciones
                             </h3>
                             {isEditing ? (
@@ -534,7 +534,7 @@ export default function EstrategiasContinuidadPage() {
                         <div className="space-y-2">
                           {/* Estructura */}
                           <div>
-                            <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                            <h3 className="text-xs font-semibold text-[#0073a4] uppercase mb-1">
                               Estructura de respuesta (alertamiento)
                             </h3>
                             {isEditing ? (
@@ -555,7 +555,7 @@ export default function EstrategiasContinuidadPage() {
 
                           {/* Actividades */}
                           <div>
-                            <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                            <h3 className="text-xs font-semibold  text-[#0073a4] uppercase mb-1">
                               Actividades en pruebas y simulacros
                             </h3>
                             {isEditing ? (
@@ -579,7 +579,7 @@ export default function EstrategiasContinuidadPage() {
 
                           {/* Frecuencias */}
                           <div>
-                            <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                            <h3 className="text-xs font-semibold  text-[#0073a4] uppercase mb-1">
                               Frecuencia de pruebas / simulacros
                             </h3>
                             {isEditing ? (
@@ -607,7 +607,7 @@ export default function EstrategiasContinuidadPage() {
                         <div className="mt-3 grid gap-2 md:grid-cols-2 text-sm">
                           {/* Resultados */}
                           <div>
-                            <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                            <h3 className="text-xs font-semibold  text-[#0073a4] uppercase mb-1">
                               Resultados de pruebas / simulacros
                             </h3>
                             {isEditing ? (
@@ -628,7 +628,7 @@ export default function EstrategiasContinuidadPage() {
 
                           {/* Monitoreo */}
                           <div>
-                            <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                            <h3 className="text-xs font-semibold  text-[#0073a4] uppercase mb-1">
                               Monitoreo y mejora continua
                             </h3>
                             {isEditing ? (
