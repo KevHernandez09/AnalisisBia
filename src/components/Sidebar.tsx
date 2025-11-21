@@ -32,7 +32,7 @@ export default function Sidebar() {
   const links: NavLink[] = [
     {
       href: "/analisis-bia",
-      label: "Mostrar Análisis BIA",
+      label: "Visualizar Análisis BIA",
       icon: <FileText size={18} />,
     },
     {
@@ -42,7 +42,7 @@ export default function Sidebar() {
     },
     {
       href: "/lista",
-      label: "Mostrar Plan de Acción",
+      label: "Visualizar Plan de Acción",
       icon: <ListTodo size={18} />,
     },
     {
@@ -52,12 +52,12 @@ export default function Sidebar() {
     },
     {
       href: "/continuidad",
-      label: "Insertar Estrategias de Continuidad",
+      label: "Añadir Estrategias de Continuidad",
       icon: <CirclePlus size={18} />,
     },
     {
       href: "/plan",
-      label: "Insertar Plan de Acción",
+      label: "Agregar Plan de Acción",
       icon: <ClipboardPlus size={18} />,
     },
   ];
