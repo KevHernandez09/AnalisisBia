@@ -8,25 +8,27 @@ type ImpactRelation = { impactType: { name: string } };
 type SubAreaRelation = { subarea: { label: string } };
 
 type ProcesoCriticoRecord = {
+  id: string;
   nombre: string;
-  descripcion: string;
-  entradas: string;
-  salidas: string;
-  partes: string;
-  sincronizacion: string;
-  rto: string;
-  mtpd: string;
-  rpo: string;
-  recursos: string;
-  requisitos: string;
-  descImpacto: string;
+  descripcion: string | null;
+  entradas: string | null;
+  salidas: string | null;
+  partes: string | null;
+  sincronizacion: string | null;
+  rto: string | null;
+  mtpd: string | null;
+  rpo: string | null;
+  recursos: string | null;
+  requisitos: string | null;
+  descImpacto: string | null;
   prioridad: string;
   subAreas: SubAreaRelation[];
   impactos: ImpactRelation[];
 };
 
 type Row = {
-  area: string;          // acá vamos a poner los nombres de subárea(s)
+  id: string;   // 👈 importante para poder editar
+  area: string;
   nombre: string;
   descripcion: string;
   entradas: string;
@@ -48,7 +50,10 @@ export async function GET(req: Request) {
   const departamentoId = searchParams.get("departamentoId");
 
   if (!departamentoId) {
-    return NextResponse.json({ error: "Falta departamentoId" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Falta departamentoId" },
+      { status: 400 },
+    );
   }
 
   try {
@@ -64,6 +69,7 @@ export async function GET(req: Request) {
         },
       },
       select: {
+        id: true,
         nombre: true,
         descripcion: true,
         entradas: true,
@@ -101,6 +107,7 @@ export async function GET(req: Request) {
       const tipoImpacto = p.impactos.map((i) => i.impactType.name).join(", ");
 
       return {
+        id: p.id,
         area: areaLabel,
         nombre: p.nombre,
         descripcion: p.descripcion ?? "",
@@ -122,6 +129,9 @@ export async function GET(req: Request) {
     return NextResponse.json({ rows }, { status: 200 });
   } catch (err) {
     console.error("Error /api/bia:", err);
-    return NextResponse.json({ error: "Error al consultar BIA" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error al consultar BIA" },
+      { status: 500 },
+    );
   }
 }

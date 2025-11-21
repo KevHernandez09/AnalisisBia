@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 type BiaRow = {
+  id: string;
   area: string;
   nombre: string;
   descripcion: string;
@@ -27,6 +28,12 @@ export default function AnalisisBIA() {
   const [rows, setRows] = useState<BiaRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [okMsg, setOkMsg] = useState<string | null>(null);
+
+  // edición
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<BiaRow | null>(null);
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -51,9 +58,11 @@ export default function AnalisisBIA() {
     { id: "18", label: "Departamento de Servicios de Salud" },
     { id: "19", label: "Comité Institucional de Emergencias" },
     { id: "20", label: "Departamento de Secretaria del Directorio" },
-    { id: "21", label: "Departamento de Servicios Parlamentarios" }, 
+    { id: "21", label: "Departamento de Servicios Parlamentarios" },
     { id: "22", label: "Departamento de Servicios Técnicos" },
   ];
+
+  const prioridades = ["Alta", "Media", "Baja"];
 
   const filtered = opciones.filter((op) =>
     op.label.toLowerCase().includes(search.toLowerCase())
@@ -85,6 +94,9 @@ export default function AnalisisBIA() {
       try {
         setLoading(true);
         setErr(null);
+        setOkMsg(null);
+        setEditingId(null);
+        setDraft(null);
 
         const r = await fetch(
           `/api/bia?departamentoId=${encodeURIComponent(selected)}`,
@@ -118,11 +130,81 @@ export default function AnalisisBIA() {
     return "bg-gray-100 text-gray-700 border-gray-300";
   };
 
+  function handleDraftChange<K extends keyof BiaRow>(field: K, value: BiaRow[K]) {
+    setDraft((prev) => (prev ? { ...prev, [field]: value } : prev));
+  }
+
+  function startEdit(row: BiaRow) {
+    setEditingId(row.id);
+    setDraft(row);
+    setOkMsg(null);
+    setErr(null);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setDraft(null);
+  }
+
+  async function saveEdit() {
+    if (!editingId || !draft) return;
+
+    try {
+      setSavingId(editingId);
+      setErr(null);
+      setOkMsg(null);
+
+      // Solo mandamos los campos que realmente existen en ProcesoCritico
+      const payload = {
+        nombre: draft.nombre,
+        descripcion: draft.descripcion,
+        entradas: draft.entradas,
+        salidas: draft.salidas,
+        partes: draft.partes,
+        sincronizacion: draft.sincronizacion,
+        rto: draft.rto,
+        mtpd: draft.mtpd,
+        rpo: draft.rpo,
+        recursos: draft.recursos,
+        requisitos: draft.requisitos,
+        descImpacto: draft.descImpacto,
+        prioridad: draft.prioridad,
+      };
+
+      const res = await fetch(
+        `/api/proceso-critico/${encodeURIComponent(editingId)}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j?.error || "Error al actualizar");
+      }
+
+      // actualizamos el estado local
+      setRows((prev) =>
+        prev.map((r) => (r.id === editingId ? { ...r, ...draft } : r))
+      );
+
+      setOkMsg("Proceso crítico actualizado correctamente.");
+      setEditingId(null);
+      setDraft(null);
+    } catch (e: any) {
+      setErr(e?.message ?? "Error inesperado al actualizar");
+    } finally {
+      setSavingId(null);
+    }
+  }
+
   return (
     <section className="text-black">
       <h1 className="text-3xl font-bold mb-2">Análisis BIA</h1>
 
-      <p className="text-sm text-gray-600 mb-6">
+      <p className="text-sm text-gray-600 mb-3">
         Departamento:{" "}
         <span className="font-medium">
           {selected ? selectedLabel : "Ninguno"}
@@ -130,6 +212,18 @@ export default function AnalisisBIA() {
         — Registros:{" "}
         <span className="font-medium">{rows.length}</span>
       </p>
+
+      {okMsg && (
+        <div className="mb-3 rounded bg-emerald-50 border border-emerald-300 text-emerald-800 px-3 py-2 text-sm">
+          {okMsg}
+        </div>
+      )}
+
+      {err && (
+        <div className="mb-3 rounded bg-red-50 border border-red-300 text-red-700 px-3 py-2 text-sm">
+          {err}
+        </div>
+      )}
 
       {/* Combobox Moderno */}
       <div className="relative max-w-xl mb-6" ref={dropdownRef}>
@@ -147,9 +241,8 @@ export default function AnalisisBIA() {
           <span>{selectedLabel}</span>
 
           <svg
-            className={`w-5 h-5 text-gray-500 transition-transform ${
-              open ? "rotate-180" : "rotate-0"
-            }`}
+            className={`w-5 h-5 text-gray-500 transition-transform ${open ? "rotate-180" : "rotate-0"
+              }`}
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
@@ -188,10 +281,9 @@ export default function AnalisisBIA() {
                     key={op.id}
                     className={`
                       px-4 py-2.5 cursor-pointer text-sm transition-all
-                      ${
-                        selected === op.id
-                          ? "bg-[#0073a4]/10 text-[#0073a4] font-semibold"
-                          : "hover:bg-gray-100"
+                      ${selected === op.id
+                        ? "bg-[#0073a4]/10 text-[#0073a4] font-semibold"
+                        : "hover:bg-gray-100"
                       }
                     `}
                     onClick={() => {
@@ -213,158 +305,333 @@ export default function AnalisisBIA() {
         )}
       </div>
 
-      {err && (
-        <div className="mb-4 rounded bg-red-50 border border-red-300 text-red-700 px-3 py-2">
-          {err}
-        </div>
-      )}
+      {loading && <p className="mb-3 text-gray-600">Cargando…</p>}
 
-      {loading && (
-        <p className="mb-3 text-gray-600">Cargando…</p>
-      )}
-
-      {/* 🔥 VISTA MODERNA: TARJETAS EN LUGAR DE TABLA */}
+      {/* Vista tarjetas con edición */}
       {rows.length > 0 ? (
         <div className="space-y-4">
-          {rows.map((r, index) => (
-            <article
-              key={index}
-              className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden"
-            >
-              {/* Header de la tarjeta */}
-              <header className="px-4 py-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between bg-slate-50 border-b border-gray-200">
-                <div className="space-y-1">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    {r.area || "Área no especificada"}
-                  </p>
-                  <h2 className="text-lg font-semibold text-slate-900">
-                    {r.nombre}
-                  </h2>
-                </div>
+          {rows.map((r) => {
+            const isEditing = editingId === r.id;
+            const data = isEditing && draft && draft.id === r.id ? draft : r;
 
-                <div className="flex flex-wrap gap-2">
-                  {r.tipoImpacto && (
-                    <span className="inline-flex items-center px-3 py-1 rounded-full border text-xs font-medium bg-sky-50 border-sky-200 text-sky-700">
-                      Impacto: {r.tipoImpacto}
-                    </span>
-                  )}
-                  {r.prioridad && (
-                    <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full border text-xs font-semibold ${prioridadColor(
-                        r.prioridad
-                      )}`}
-                    >
-                      Prioridad: {r.prioridad}
-                    </span>
-                  )}
-                </div>
-              </header>
-
-              {/* Contenido */}
-              <div className="px-4 py-3 grid gap-4 md:grid-cols-2">
-                {/* Columna izquierda */}
-                <div className="space-y-3 text-sm">
-                  <div>
-                    <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                      Descripción del proceso crítico
-                    </h3>
-                    <p className="text-slate-800 whitespace-pre-line">
-                      {r.descripcion || "Sin descripción registrada."}
+            return (
+              <article
+                key={r.id}
+                className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden"
+              >
+                {/* Header de la tarjeta */}
+                <header className="px-4 py-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between bg-slate-50 border-b border-gray-200">
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      {data.area || "Área no especificada"}
                     </p>
+
+                    {isEditing ? (
+                      <input
+                        className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm"
+                        value={data.nombre}
+                        onChange={(e) => handleDraftChange("nombre", e.target.value)}
+                      />
+                    ) : (
+                      <h2 className="text-lg font-semibold text-slate-900">
+                        {data.nombre}
+                      </h2>
+                    )}
                   </div>
 
-                  <div className="grid gap-2 md:grid-cols-2">
-                    <div>
-                      <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                        Entradas
-                      </h3>
-                      <p className="text-slate-800 whitespace-pre-line">
-                        {r.entradas || "—"}
-                      </p>
+                  <div className="flex flex-wrap gap-2 items-center">
+                    {/* tipoImpacto solo lectura, prioridad editable */}
+                    {data.tipoImpacto && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full border text-xs font-medium bg-sky-50 border-sky-200 text-sky-700">
+                        Impacto: {data.tipoImpacto}
+                      </span>
+                    )}
+
+                    {isEditing ? (
+                      <select
+                        className="border border-gray-300 rounded-full px-3 py-1 text-xs"
+                        value={data.prioridad}
+                        onChange={(e) =>
+                          handleDraftChange("prioridad", e.target.value)
+                        }
+                      >
+                        <option value="">Prioridad...</option>
+                        {prioridades.map((p) => (
+                          <option key={p} value={p}>
+                            {p}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      data.prioridad && (
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-full border text-xs font-semibold ${prioridadColor(
+                            data.prioridad
+                          )}`}
+                        >
+                          Prioridad: {data.prioridad}
+                        </span>
+                      )
+                    )}
+
+                    {/* Botones edición */}
+                    <div className="flex items-center gap-2 ml-2">
+                      {isEditing ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={saveEdit}
+                            disabled={savingId === r.id}
+                            className="px-3 py-1 rounded-md bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-500 disabled:opacity-60"
+                          >
+                            {savingId === r.id ? "Guardando..." : "Guardar"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={cancelEdit}
+                            disabled={savingId === r.id}
+                            className="px-3 py-1 rounded-md border border-gray-300 text-xs text-gray-700 hover:bg-gray-50"
+                          >
+                            Cancelar
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => startEdit(r)}
+                          className="px-3 py-1 rounded-md border border-yellow-300 text-xs text-black-700 bg-yellow-50"
+                        >
+                          Editar
+                        </button>
+                      )}
                     </div>
+                  </div>
+                </header>
+
+                {/* Contenido */}
+                <div className="px-4 py-3 grid gap-4 md:grid-cols-2">
+                  {/* Columna izquierda */}
+                  <div className="space-y-3 text-sm">
                     <div>
                       <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                        Salidas
+                        Descripción del proceso crítico
                       </h3>
-                      <p className="text-slate-800 whitespace-pre-line">
-                        {r.salidas || "—"}
-                      </p>
+                      {isEditing ? (
+                        <textarea
+                          className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                          rows={3}
+                          value={data.descripcion}
+                          onChange={(e) =>
+                            handleDraftChange("descripcion", e.target.value)
+                          }
+                        />
+                      ) : (
+                        <p className="text-slate-800 whitespace-pre-line">
+                          {data.descripcion || "Sin descripción registrada."}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="grid gap-2 md:grid-cols-2">
+                      <div>
+                        <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                          Entradas
+                        </h3>
+                        {isEditing ? (
+                          <textarea
+                            className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                            rows={2}
+                            value={data.entradas}
+                            onChange={(e) =>
+                              handleDraftChange("entradas", e.target.value)
+                            }
+                          />
+                        ) : (
+                          <p className="text-slate-800 whitespace-pre-line">
+                            {data.entradas || "—"}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                          Salidas
+                        </h3>
+                        {isEditing ? (
+                          <textarea
+                            className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                            rows={2}
+                            value={data.salidas}
+                            onChange={(e) =>
+                              handleDraftChange("salidas", e.target.value)
+                            }
+                          />
+                        ) : (
+                          <p className="text-slate-800 whitespace-pre-line">
+                            {data.salidas || "—"}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                        Partes interesadas (usuarios)
+                      </h3>
+                      {isEditing ? (
+                        <textarea
+                          className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                          rows={2}
+                          value={data.partes}
+                          onChange={(e) =>
+                            handleDraftChange("partes", e.target.value)
+                          }
+                        />
+                      ) : (
+                        <p className="text-slate-800 whitespace-pre-line">
+                          {data.partes || "—"}
+                        </p>
+                      )}
                     </div>
                   </div>
 
-                  <div>
-                    <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                      Partes interesadas (usuarios)
-                    </h3>
-                    <p className="text-slate-800 whitespace-pre-line">
-                      {r.partes || "—"}
-                    </p>
+                  {/* Columna derecha */}
+                  <div className="space-y-3 text-sm">
+                    <div className="grid gap-2 md:grid-cols-3">
+                      <div>
+                        <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                          RTO
+                        </h3>
+                        {isEditing ? (
+                          <input
+                            className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm"
+                            value={data.rto}
+                            onChange={(e) =>
+                              handleDraftChange("rto", e.target.value)
+                            }
+                          />
+                        ) : (
+                          <p className="text-slate-800">{data.rto || "—"}</p>
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                          MTPD
+                        </h3>
+                        {isEditing ? (
+                          <input
+                            className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm"
+                            value={data.mtpd}
+                            onChange={(e) =>
+                              handleDraftChange("mtpd", e.target.value)
+                            }
+                          />
+                        ) : (
+                          <p className="text-slate-800">{data.mtpd || "—"}</p>
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                          RPO
+                        </h3>
+                        {isEditing ? (
+                          <input
+                            className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm"
+                            value={data.rpo}
+                            onChange={(e) =>
+                              handleDraftChange("rpo", e.target.value)
+                            }
+                          />
+                        ) : (
+                          <p className="text-slate-800">{data.rpo || "—"}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                        Sincronización con otros procesos
+                      </h3>
+                      {isEditing ? (
+                        <textarea
+                          className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                          rows={2}
+                          value={data.sincronizacion}
+                          onChange={(e) =>
+                            handleDraftChange("sincronizacion", e.target.value)
+                          }
+                        />
+                      ) : (
+                        <p className="text-slate-800 whitespace-pre-line">
+                          {data.sincronizacion || "—"}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="grid gap-2 md:grid-cols-2">
+                      <div>
+                        <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                          Recursos necesarios
+                        </h3>
+                        {isEditing ? (
+                          <textarea
+                            className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                            rows={2}
+                            value={data.recursos}
+                            onChange={(e) =>
+                              handleDraftChange("recursos", e.target.value)
+                            }
+                          />
+                        ) : (
+                          <p className="text-slate-800 whitespace-pre-line">
+                            {data.recursos || "—"}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                          Requisitos legales y normativos
+                        </h3>
+                        {isEditing ? (
+                          <textarea
+                            className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                            rows={2}
+                            value={data.requisitos}
+                            onChange={(e) =>
+                              handleDraftChange("requisitos", e.target.value)
+                            }
+                          />
+                        ) : (
+                          <p className="text-slate-800 whitespace-pre-line">
+                            {data.requisitos || "—"}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                        Descripción del impacto
+                      </h3>
+                      {isEditing ? (
+                        <textarea
+                          className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                          rows={3}
+                          value={data.descImpacto}
+                          onChange={(e) =>
+                            handleDraftChange("descImpacto", e.target.value)
+                          }
+                        />
+                      ) : (
+                        <p className="text-slate-800 whitespace-pre-line">
+                          {data.descImpacto || "—"}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
-
-                {/* Columna derecha */}
-                <div className="space-y-3 text-sm">
-                  <div className="grid gap-2 md:grid-cols-3">
-                    <div>
-                      <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                        RTO
-                      </h3>
-                      <p className="text-slate-800">{r.rto || "—"}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                        MTPD
-                      </h3>
-                      <p className="text-slate-800">{r.mtpd || "—"}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                        RPO
-                      </h3>
-                      <p className="text-slate-800">{r.rpo || "—"}</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                      Sincronización con otros procesos
-                    </h3>
-                    <p className="text-slate-800 whitespace-pre-line">
-                      {r.sincronizacion || "—"}
-                    </p>
-                  </div>
-
-                  <div className="grid gap-2 md:grid-cols-2">
-                    <div>
-                      <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                        Recursos necesarios
-                      </h3>
-                      <p className="text-slate-800 whitespace-pre-line">
-                        {r.recursos || "—"}
-                      </p>
-                    </div>
-                    <div>
-                      <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                        Requisitos legales y normativos
-                      </h3>
-                      <p className="text-slate-800 whitespace-pre-line">
-                        {r.requisitos || "—"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
-                      Descripción del impacto
-                    </h3>
-                    <p className="text-slate-800 whitespace-pre-line">
-                      {r.descImpacto || "—"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       ) : (
         <div className="mt-6 border rounded-xl bg-gray-50 px-4 py-6 text-center text-gray-500 italic">

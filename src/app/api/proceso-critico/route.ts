@@ -3,6 +3,8 @@ import { z } from "zod";
 import { prisma } from "../../../../lib/prisma";
 import { Prisma } from "@prisma/client";
 
+export const dynamic = "force-dynamic";
+
 /**
  * VALIDACIÓN DEL BODY
  */
@@ -29,7 +31,7 @@ const BodySchema = z.object({
 });
 
 /**
- * POST
+ * POST /api/proceso-critico
  */
 export async function POST(req: Request) {
   try {
@@ -69,16 +71,16 @@ export async function POST(req: Request) {
     }
 
     // === Validar Pertenencia al Departamento ===
-    const inválidas = subAreasDb.filter(
+    const invalidas = subAreasDb.filter(
       (sa) => sa.areaId !== data.departamentoId,
     );
 
-    if (inválidas.length > 0) {
+    if (invalidas.length > 0) {
       return NextResponse.json(
         {
           error:
             "Subáreas que NO pertenecen al departamento seleccionado: " +
-            inválidas.map((x) => x.label).join(", "),
+            invalidas.map((x) => x.label).join(", "),
         },
         { status: 400 },
       );
