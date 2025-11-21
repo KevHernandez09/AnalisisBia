@@ -33,35 +33,39 @@ const departamentos = [
 
 // === SUBÁREAS ===
 const subAreas = [
-  { id: "gestion-pagos-tesoreria", label: "Área de gestión de pagos y tesorería", areaId: "14" },
-  { id: "planilla-diputados", label: "Área de planilla de diputados", areaId: "14" },
-  { id: "presupuesto", label: "Área de presupuesto", areaId: "14" },
-  { id: "contabilidad", label: "Área de contabilidad", areaId: "14" },
-  { id: "compras", label: "Área de compras", areaId: "16" },
-  {
-    id: "almacen-suministros-bienes-muebles",
-    label: "Área de almacén de suministros y bienes muebles",
-    areaId: "16",
-  },
-  { id: "gestion-control", label: "Área de gestión y control", areaId: "16" },
-  { id: "protocolo-area", label: "Área de protocolo", areaId: "6" },
-  { id: "administracion-salarios", label: "Área de administración de salarios", areaId: "17" },
-  { id: "gestion-admin", label: "Área de Gestión Administrativa", areaId: "18" },
-  {
-    id: "aprobacion-seguimiento-evaluacion-presupuesto",
-    label: "Área de aprobación, seguimiento y evaluación del presupuesto",
-    areaId: "11",
-  },
-  { id: "procesos-legislativos", label: "Área de procesos legislativos", areaId: "6" },
-  { id: "actas-sonido-grabacion", label: "Área de actas, sonido y grabación", areaId: "6" },
-  { id: "gestion-asuntos-plenario", label: "Área de gestión de asuntos del plenario", areaId: "20" },
-  { id: "todo-departamento-sub", label: "Todo el departamento", areaId: "1" },
+  { id: "accesibilidad-discapacidad", label: "Área de accesibilidad para las personas con discapacidad en la Asamblea Legislativa", areaId: "4" },
+  { id: "sol-parl", label: "Área de Soluciones Parlamentarias", areaId: "5" },
+  { id: "infra", label: "Área de Infraestructura", areaId: "5" },
+  { id: "sol-apo-admin", label: "Área de Soluciones de Apoyo Administartivo", areaId: "5" },
+  { id: "actas-sonido-grabacion", label: "Área de Actas, Sonido y Grabación", areaId: "6" },
+  { id: "administracion-salarios", label: "Área de Administración de Salarios", areaId: "17" },
+  { id: "almacen-suministros-bienes-muebles", label: "Área de Almacén de Suministros y Bienes muebles", areaId: "16" },
+  { id: "aprobacion-seguimiento-evaluacion-presupuesto", label: "Área de Aprobación, Seguimiento y Evaluación del Presupuesto", areaId: "11" },
+  { id: "compras", label: "Área de Compras", areaId: "16" },
+  { id: "contabilidad", label: "Área de Contabilidad", areaId: "14" },
+  { id: "continuidad*servicio", label: "Área de Gestión Administrativa de Continuidad del Servicio", areaId: "13" },
+  { id: "contratacion-administrativa", label: "Área de Contratación Administrativa", areaId: "7" },
   { id: "departamento-directorio", label: "Todo el departamento de Secretaria del Directorio", areaId: "20" },
   { id: "dep-pren-inst", label: "Todo el departamento de Prensa Institucional", areaId: "8" },
   { id: "dep-ser-salud", label: "Todo el departamento de Servicios de Salud", areaId: "18" },
   { id: "dep-ser-tec", label: "Todo el departamento de Servicios Técnicos", areaId: "22" },
-  { id: "contratacion-administrativa", label: "Área de contratación administrativa", areaId: "7" },
-  { id: "accesibilidad-discapacidad", label: "Área de accesibilidad para las personas con discapacidad en la Asamblea Legislativa", areaId: "4" },
+  { id: "ger-admin-gestion", label: "Gerencia Administrativa/Área de Gestión Administrativa", areaId: "13" },
+  { id: "gestion-admin", label: "Área de Gestión Administrativa", areaId: "18" },
+  { id: "seg-op-int", label: "Área de Seguridad Operativa-Monitoreo-Inteligencia", areaId: "9" },
+  { id: "infor-ciber", label: "Área de Seguridad de la Información-Ciberseguridad", areaId: "9" },
+  { id: "ujieres", label: "Área de Ujieres", areaId: "15" },
+  { id: "transporte", label: "Área de Transporte", areaId: "15" },
+  { id: "mantenimiento", label: "Área de Mantenimiento", areaId: "15" },
+  { id: "gestion-asuntos-plenario", label: "Área de Gestión de Asuntos del Plenario", areaId: "20" },
+  { id: "gestion-control", label: "Área de Gestión y Control", areaId: "16" },
+  { id: "gestion-pagos-tesoreria", label: "Área de Gestión de Pagos y Tesorería", areaId: "14" },
+  { id: "planilla-diputados", label: "Área de Planilla de Diputados", areaId: "14" },
+  { id: "presupuesto", label: "Área de Presupuesto", areaId: "14" },
+  { id: "procesos-legislativos", label: "Área de Procesos Legislativos", areaId: "6" },
+  { id: "protocolo-area", label: "Área de protocolo", areaId: "6" },
+  { id: "salud-proceso", label: "Proceso de Salud Ocupacional", areaId: "13" },
+  { id: "todo-departamento-sub", label: "Todo el departamento", areaId: "1" },
+
 ];
 
 const tiposImpactoCat = [
@@ -259,9 +263,8 @@ export default function InsertarProcesoCriticoPage() {
                 >
                   <span>{selectedDepartamentoLabel}</span>
                   <svg
-                    className={`w-5 h-5 text-gray-500 transition-transform ${
-                      deptOpen ? "rotate-180" : "rotate-0"
-                    }`}
+                    className={`w-5 h-5 text-gray-500 transition-transform ${deptOpen ? "rotate-180" : "rotate-0"
+                      }`}
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
@@ -296,10 +299,9 @@ export default function InsertarProcesoCriticoPage() {
                             key={d.id}
                             className={`
                               px-4 py-2.5 cursor-pointer text-sm transition-all
-                              ${
-                                departamentoId === d.id
-                                  ? "bg-[#0073a4]/10 text-[#0073a4] font-semibold"
-                                  : "hover:bg-gray-100"
+                              ${departamentoId === d.id
+                                ? "bg-[#0073a4]/10 text-[#0073a4] font-semibold"
+                                : "hover:bg-gray-100"
                               }
                             `}
                             onClick={() => {
