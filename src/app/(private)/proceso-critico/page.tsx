@@ -36,14 +36,14 @@ const subAreas = [
   { id: "accesibilidad-discapacidad", label: "Área de accesibilidad para las personas con discapacidad en la Asamblea Legislativa", areaId: "4" },
   { id: "sol-parl", label: "Área de Soluciones Parlamentarias", areaId: "5" },
   { id: "infra", label: "Área de Infraestructura", areaId: "5" },
-  { id: "sol-apo-admin", label: "Área de Soluciones de Apoyo Administartivo", areaId: "5" },
+  { id: "sol-apo-admin", label: "Área de Soluciones de Apoyo Administrativo", areaId: "5" },
   { id: "actas-sonido-grabacion", label: "Área de Actas, Sonido y Grabación", areaId: "6" },
   { id: "administracion-salarios", label: "Área de Administración de Salarios", areaId: "17" },
   { id: "almacen-suministros-bienes-muebles", label: "Área de Almacén de Suministros y Bienes muebles", areaId: "16" },
   { id: "aprobacion-seguimiento-evaluacion-presupuesto", label: "Área de Aprobación, Seguimiento y Evaluación del Presupuesto", areaId: "11" },
   { id: "compras", label: "Área de Compras", areaId: "16" },
   { id: "contabilidad", label: "Área de Contabilidad", areaId: "14" },
-  { id: "continuidad*servicio", label: "Área de Gestión Administrativa de Continuidad del Servicio", areaId: "13" },
+  { id: "continuidad-servicio", label: "Área de Gestión Administrativa de Continuidad del Servicio", areaId: "13" },
   { id: "contratacion-administrativa", label: "Área de Contratación Administrativa", areaId: "7" },
   { id: "departamento-directorio", label: "Todo el departamento de Secretaria del Directorio", areaId: "20" },
   { id: "dep-pren-inst", label: "Todo el departamento de Prensa Institucional", areaId: "8" },
@@ -65,7 +65,6 @@ const subAreas = [
   { id: "protocolo-area", label: "Área de protocolo", areaId: "6" },
   { id: "salud-proceso", label: "Proceso de Salud Ocupacional", areaId: "13" },
   { id: "todo-departamento-sub", label: "Todo el departamento", areaId: "1" },
-
 ];
 
 const tiposImpactoCat = [
@@ -78,6 +77,8 @@ const tiposImpactoCat = [
   "Ambiental",
   "A la cuidadanía",
   "Rompimiento del órden constitucional",
+  "Seguridad e integridad física",
+  "Impacto a la confidencialidad, integridad y disponibilidad de la información."
 ];
 
 const prioridades = ["Alta", "Media", "Baja"];
@@ -114,7 +115,7 @@ export default function InsertarProcesoCriticoPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [okMsg, setOkMsg] = useState<string | null>(null);
 
-  // 🔹 Estado para el combobox de departamento
+  // Estado para el combobox de departamento
   const [departamentoId, setDepartamentoId] = useState("");
   const [deptSearch, setDeptSearch] = useState("");
   const [deptOpen, setDeptOpen] = useState(false);
@@ -125,7 +126,8 @@ export default function InsertarProcesoCriticoPage() {
   );
 
   const selectedDepartamentoLabel =
-    departamentos.find((d) => d.id === departamentoId)?.label || "Seleccione un departamento…";
+    departamentos.find((d) => d.id === departamentoId)?.label ||
+    "Seleccione un departamento…";
 
   // Cerrar dropdown de departamento al hacer clic fuera
   useEffect(() => {
@@ -144,11 +146,15 @@ export default function InsertarProcesoCriticoPage() {
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    // ✅ Guardamos referencia al formulario ANTES del await
+    const form = e.currentTarget;
+
     setPending(true);
     setOkMsg(null);
     setErrors({});
 
-    const fd = new FormData(e.currentTarget);
+    const fd = new FormData(form);
 
     const data: BiaFormData = {
       departamentoId: String(fd.get("departamentoId") ?? ""),
@@ -196,7 +202,9 @@ export default function InsertarProcesoCriticoPage() {
       }
 
       setOkMsg("Proceso crítico guardado correctamente.");
-      e.currentTarget.reset();
+
+      // ✅ Usamos la referencia al form; el evento ya podría estar liberado
+      form.reset();
       setDepartamentoId("");
     } catch (err: any) {
       setErrors({ _root: err.message ?? "Error inesperado" });
@@ -216,8 +224,8 @@ export default function InsertarProcesoCriticoPage() {
       <header className="mb-6">
         <h1 className="text-3xl font-bold">Insertar Proceso Crítico</h1>
         <p className="text-sm text-gray-600 mt-1">
-          Registre la información clave del proceso crítico, sus recursos y los impactos asociados
-          para el análisis BIA institucional.
+          Registre la información clave del proceso crítico, sus recursos y los
+          impactos asociados para el análisis BIA institucional.
         </p>
       </header>
 
@@ -248,7 +256,11 @@ export default function InsertarProcesoCriticoPage() {
                 <label className={labelClass}>Departamento</label>
 
                 {/* input hidden para FormData */}
-                <input type="hidden" name="departamentoId" value={departamentoId} />
+                <input
+                  type="hidden"
+                  name="departamentoId"
+                  value={departamentoId}
+                />
 
                 <button
                   type="button"
@@ -270,7 +282,11 @@ export default function InsertarProcesoCriticoPage() {
                     strokeWidth="2"
                     viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </button>
 
@@ -343,22 +359,30 @@ export default function InsertarProcesoCriticoPage() {
                   ))}
                 </select>
                 {errors.prioridad && (
-                  <p className="text-xs text-red-600 mt-1">{errors.prioridad}</p>
+                  <p className="text-xs text-red-600 mt-1">
+                    {errors.prioridad}
+                  </p>
                 )}
               </div>
 
               {/* NOMBRE */}
               <div className="md:col-span-2">
-                <label className={labelClass}>Nombre del Proceso Crítico</label>
+                <label className={labelClass}>
+                  Nombre del Proceso Crítico
+                </label>
                 <input name="nombre" className={fieldClass} />
                 {errors.nombre && (
-                  <p className="text-xs text-red-600 mt-1">{errors.nombre}</p>
+                  <p className="text-xs text-red-600 mt-1">
+                    {errors.nombre}
+                  </p>
                 )}
               </div>
 
               {/* DESCRIPCIÓN */}
               <div className="md:col-span-2">
-                <label className={labelClass}>Descripción del Proceso Crítico</label>
+                <label className={labelClass}>
+                  Descripción del Proceso Crítico
+                </label>
                 <textarea
                   name="descripcion"
                   rows={3}
@@ -379,7 +403,9 @@ export default function InsertarProcesoCriticoPage() {
               Subáreas vinculadas
             </legend>
             {errors.subAreaIds && (
-              <p className="text-xs text-red-600 mb-2">{errors.subAreaIds}</p>
+              <p className="text-xs text-red-600 mb-2">
+                {errors.subAreaIds}
+              </p>
             )}
 
             <div className="grid md:grid-cols-3 gap-2 mt-2">
@@ -407,19 +433,33 @@ export default function InsertarProcesoCriticoPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className={labelClass}>Entradas</label>
-                <textarea name="entradas" rows={2} className={fieldClass + " resize-y"} />
+                <textarea
+                  name="entradas"
+                  rows={2}
+                  className={fieldClass + " resize-y"}
+                />
               </div>
               <div>
                 <label className={labelClass}>Salidas</label>
-                <textarea name="salidas" rows={2} className={fieldClass + " resize-y"} />
+                <textarea
+                  name="salidas"
+                  rows={2}
+                  className={fieldClass + " resize-y"}
+                />
               </div>
 
               <div>
                 <label className={labelClass}>Partes interesadas</label>
-                <textarea name="partes" rows={2} className={fieldClass + " resize-y"} />
+                <textarea
+                  name="partes"
+                  rows={2}
+                  className={fieldClass + " resize-y"}
+                />
               </div>
               <div>
-                <label className={labelClass}>Sincronización con otros procesos</label>
+                <label className={labelClass}>
+                  Sincronización con otros procesos
+                </label>
                 <textarea
                   name="sincronizacion"
                   rows={2}
@@ -442,10 +482,16 @@ export default function InsertarProcesoCriticoPage() {
 
               <div>
                 <label className={labelClass}>Recursos necesarios</label>
-                <textarea name="recursos" rows={2} className={fieldClass + " resize-y"} />
+                <textarea
+                  name="recursos"
+                  rows={2}
+                  className={fieldClass + " resize-y"}
+                />
               </div>
               <div>
-                <label className={labelClass}>Requisitos legales y normativos</label>
+                <label className={labelClass}>
+                  Requisitos legales y normativos
+                </label>
                 <textarea
                   name="requisitos"
                   rows={2}
@@ -462,7 +508,9 @@ export default function InsertarProcesoCriticoPage() {
             </legend>
 
             {errors.tiposImpacto && (
-              <p className="text-xs text-red-600 mb-2">{errors.tiposImpacto}</p>
+              <p className="text-xs text-red-600 mb-2">
+                {errors.tiposImpacto}
+              </p>
             )}
 
             <div className="grid md:grid-cols-3 gap-2 mb-3">
