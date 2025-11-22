@@ -95,7 +95,7 @@ export default function LoginPage() {
                   Iniciar sesión
                 </h2>
                 <p className="text-xs text-slate-400 mt-1">
-                  Acceso institucional.
+                  Acceso institucional
                 </p>
               </div>
               <div className="inline-flex h-10 px-3 items-center justify-center rounded-xl border border-slate-600/80 text-[11px] uppercase tracking-[0.16em] text-slate-300">
@@ -141,7 +141,7 @@ export default function LoginPage() {
                 disabled={loading}
                 className="mt-2 w-full rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg hover:from-cyan-400 hover:to-blue-400 transition-all disabled:opacity-60"
               >
-                {loading ? "Validando..." : "Entrar"}
+                {loading ? "Validando..." : "Entrar"} 
               </button>
             </form>
           </div>
