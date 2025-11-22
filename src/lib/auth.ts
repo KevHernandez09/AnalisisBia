@@ -55,8 +55,9 @@ export function clearSessionCookie(response: NextResponse) {
   return response;
 }
 
-export function getSessionFromCookies() {
-  const token = cookies().get(SESSION_COOKIE)?.value;
+export async function getSessionFromCookies() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(SESSION_COOKIE)?.value;
   return verifySessionToken(token);
 }
 
@@ -65,8 +66,8 @@ export function getSessionFromRequest(req: NextRequest) {
   return verifySessionToken(token);
 }
 
-export function requireApiSession() {
-  const session = getSessionFromCookies();
+export async function requireApiSession() {
+  const session = await getSessionFromCookies();
 
   if (!session) {
     return {

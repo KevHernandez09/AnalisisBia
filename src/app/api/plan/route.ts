@@ -18,7 +18,7 @@ const PlanAccionSchema = z.object({
 
 // GET /api/plan?planId=1
 export async function GET(req: NextRequest) {
-  const { session, response } = requireApiSession();
+  const { session, response } = await requireApiSession();
 
   if (!session) return response;
 
@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
 
 // POST /api/plan
 export async function POST(req: NextRequest) {
-  const { session, response } = requireApiSession();
+  const { session, response } = await requireApiSession();
 
   if (!session) return response;
 

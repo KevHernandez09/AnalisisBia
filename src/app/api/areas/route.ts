@@ -5,7 +5,7 @@ import { requireApiSession } from "@/lib/auth";
 
 
 export async function GET() {
-  const { session, response } = requireApiSession();
+  const { session, response } = await requireApiSession();
 
   if (!session) return response;
 

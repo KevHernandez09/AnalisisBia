@@ -35,7 +35,7 @@ const BodySchema = z.object({
  * POST /api/proceso-critico
  */
 export async function POST(req: Request) {
-  const { session, response } = requireApiSession();
+  const { session, response } = await requireApiSession();
 
   if (!session) return response;
 

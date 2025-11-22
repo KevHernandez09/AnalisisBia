@@ -47,7 +47,7 @@ type Row = {
 };
 
 export async function GET(req: Request) {
-  const { session, response } = requireApiSession();
+  const { session, response } = await requireApiSession();
 
   if (!session) return response;
 

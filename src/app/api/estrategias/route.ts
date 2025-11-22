@@ -50,7 +50,7 @@ export type StrategyRow = {
 // ============ POST: crear las estrategias ============
 
 export async function POST(req: Request) {
-  const { session, response } = requireApiSession();
+  const { session, response } = await requireApiSession();
 
   if (!session) return response;
 
@@ -136,7 +136,7 @@ export async function POST(req: Request) {
 // ============ GET: listar estrategias por areaId para la tabla ============
 
 export async function GET(req: Request) {
-  const { session, response } = requireApiSession();
+  const { session, response } = await requireApiSession();
 
   if (!session) return response;
 
