@@ -4,12 +4,6 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { setSessionCookie } from "@/lib/auth";
 
-const BCRYPT_PREFIXES = ["$2a$", "$2b$", "$2y$"];
-
-function isBcryptHash(value: string) {
-  return BCRYPT_PREFIXES.some((prefix) => value.startsWith(prefix));
-}
-
 export async function POST(req: Request) {
   const { email, password } = (await req.json()) as {
     email?: string;
@@ -32,25 +26,9 @@ export async function POST(req: Request) {
     );
   }
 
-  const passwordMatches = await (async () => {
-    if (isBcryptHash(user.passwordHash)) {
-      return bcrypt.compare(password, user.passwordHash);
-    }
+  const isValidPassword = await bcrypt.compare(password, user.passwordHash);
 
-    const matchesPlaintext = password === user.passwordHash;
-
-    if (!matchesPlaintext) return false;
-
-    const normalizedHash = await bcrypt.hash(password, 10);
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { passwordHash: normalizedHash },
-    });
-
-    return true;
-  })();
-
-  if (!passwordMatches) {
+  if (!isValidPassword) {
     return NextResponse.json(
       { error: "Credenciales inválidas." },
       { status: 401 },

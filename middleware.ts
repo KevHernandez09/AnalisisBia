@@ -1,6 +1,6 @@
 // middleware.ts
 import { NextResponse, type NextRequest } from "next/server";
-import { getSessionFromRequest } from "@/lib/auth";
+import { isAuthenticated } from "@/lib/auth";
 
 const PUBLIC_ROUTES = ["/login", "/api/auth/login", "/api/auth/logout"];
 
@@ -19,9 +19,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const session = getSessionFromRequest(req);
-
-  if (!session) {
+  if (!isAuthenticated(req)) {
     if (pathname.startsWith("/api")) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
@@ -33,5 +31,14 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/(private)/(.*)",
+    "/analisis-bia",
+    "/estrategias-bia",
+    "/lista",
+    "/proceso-critico",
+    "/continuidad",
+    "/plan",
+    "/api/:path*",
+  ],
 };
