@@ -263,7 +263,7 @@ export default function InsertarEstrategiaContinuidadPage() {
   const requiredMark = <span className="text-red-500 ml-0.5">*</span>;
 
   return (
-    <section className="text-black max-w-6xl mx-auto">
+    <section className="text-black px-6 pt-6">
       <header className="mb-6">
         <h1 className="text-3xl font-bold">Estrategias de Continuidad</h1>
         <p className="text-sm text-gray-600 mt-1">

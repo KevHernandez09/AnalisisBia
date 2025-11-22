@@ -201,8 +201,8 @@ export default function AnalisisBIA() {
   }
 
   return (
-    <section className="text-black">
-      <h1 className="text-3xl font-bold mb-2">Análisis BIA</h1>
+    <section className="text-black px-6 pt-6">
+      <h1 className="text-3xl font-bold text-black mb-2">Análisis BIA</h1>
 
       <p className="text-sm text-gray-600 mb-3">
         Departamento:{" "}

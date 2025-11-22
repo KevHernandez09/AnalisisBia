@@ -220,7 +220,7 @@ export default function InsertarProcesoCriticoPage() {
   const labelClass = "block text-sm font-semibold text-[#0073a4] mb-1";
 
   return (
-    <section className="text-black max-w-6xl mx-auto">
+    <section className="text-black px-6 pt-6">
       <header className="mb-6">
         <h1 className="text-3xl font-bold">Insertar Proceso Crítico</h1>
         <p className="text-sm text-gray-600 mt-1">

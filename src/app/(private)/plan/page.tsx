@@ -108,7 +108,7 @@ export default function PlanPage() {
     "outline-none focus:border-[#0073a4] focus:ring-2 focus:ring-[#0073a4]/30 shadow-sm transition";
 
   return (
-    <section className="px-6 pt-6 pb-10 text-black max-w-4xl mx-auto">
+    <section className="text-black px-6 pt-6">
       <h1 className="text-3xl font-bold mb-2">Insertar Plan de Acción</h1>
       <p className="text-sm text-gray-600 mb-6">
         Complete la siguiente información para registrar un nuevo plan de Acción.

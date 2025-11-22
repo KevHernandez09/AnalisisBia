@@ -106,7 +106,7 @@ export default function PlanListaPage() {
   }, [rows, search]);
 
   return (
-    <section className="px-4 py-8 md:px-8 text-black">
+    <section className="text-black px-6 pt-6">
       <div className="max-w-7xl mx-auto space-y-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
