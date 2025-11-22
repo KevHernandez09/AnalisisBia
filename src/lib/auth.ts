@@ -66,6 +66,10 @@ export function getSessionFromRequest(req: NextRequest) {
   return verifySessionToken(token);
 }
 
+export function isAuthenticated(req: NextRequest) {
+  return Boolean(getSessionFromRequest(req));
+}
+
 export async function requireApiSession() {
   const session = await getSessionFromCookies();
 
