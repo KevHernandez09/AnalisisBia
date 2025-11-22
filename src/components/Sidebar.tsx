@@ -62,10 +62,15 @@ export default function Sidebar() {
     },
   ];
 
-  // 🔹 LOGOUT: borra la cookie y redirige
-  function handleLogout() {
-    document.cookie = "bia_demo_auth=; path=/; max-age=0";
-    router.push("/login");
+  // 🔹 LOGOUT: limpia la sesión en el servidor y redirige
+  async function handleLogout() {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (err) {
+      console.error("Error al cerrar sesión", err);
+    } finally {
+      router.push("/login");
+    }
   }
 
   return (

@@ -1,20 +1,31 @@
 // middleware.ts
 import { NextResponse, type NextRequest } from "next/server";
+import { getSessionFromRequest } from "@/lib/auth";
 
-const AUTH_COOKIE = "bia_demo_auth";
-const PUBLIC_ROUTES = ["/login"];
+const PUBLIC_ROUTES = ["/login", "/api/auth/login", "/api/auth/logout"];
+
+function isPublicRoute(pathname: string) {
+  return (
+    PUBLIC_ROUTES.some((route) => pathname.startsWith(route)) ||
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/favicon.ico")
+  );
+}
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // permitir /login sin cookie
-  if (PUBLIC_ROUTES.includes(pathname)) {
+  if (isPublicRoute(pathname)) {
     return NextResponse.next();
   }
 
-  const hasAuth = req.cookies.get(AUTH_COOKIE)?.value === "1";
+  const session = getSessionFromRequest(req);
 
-  if (!hasAuth) {
+  if (!session) {
+    if (pathname.startsWith("/api")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
@@ -22,7 +33,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/private/:path*", 
-  ],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
