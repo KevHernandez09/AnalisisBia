@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
+import { requireApiSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +47,10 @@ type Row = {
 };
 
 export async function GET(req: Request) {
+  const { session, response } = requireApiSession();
+
+  if (!session) return response;
+
   const { searchParams } = new URL(req.url);
   const departamentoId = searchParams.get("departamentoId");
 

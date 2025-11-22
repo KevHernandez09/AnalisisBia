@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "../../../../lib/prisma";
+import { requireApiSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +50,10 @@ export type StrategyRow = {
 // ============ POST: crear las estrategias ============
 
 export async function POST(req: Request) {
+  const { session, response } = requireApiSession();
+
+  if (!session) return response;
+
   try {
     const raw = await req.json();
     const data = BodySchema.parse(raw);
@@ -131,6 +136,10 @@ export async function POST(req: Request) {
 // ============ GET: listar estrategias por areaId para la tabla ============
 
 export async function GET(req: Request) {
+  const { session, response } = requireApiSession();
+
+  if (!session) return response;
+
   const { searchParams } = new URL(req.url);
   const areaId = searchParams.get("areaId");
 

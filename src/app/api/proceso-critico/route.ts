@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "../../../../lib/prisma";
 import { Prisma } from "@prisma/client";
+import { requireApiSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,10 @@ const BodySchema = z.object({
  * POST /api/proceso-critico
  */
 export async function POST(req: Request) {
+  const { session, response } = requireApiSession();
+
+  if (!session) return response;
+
   try {
     const raw = await req.json();
     const data = BodySchema.parse(raw);

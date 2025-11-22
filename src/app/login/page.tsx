@@ -5,30 +5,41 @@ import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-const DEFAULT_EMAIL = "admin@institucion.go.cr";
-const DEFAULT_PASSWORD = "admin123";
-
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState(DEFAULT_EMAIL);
-  const [password, setPassword] = useState(DEFAULT_PASSWORD);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    if (email === DEFAULT_EMAIL && password === DEFAULT_PASSWORD) {
-      // Marca sesión de demo (cookie sencilla)
-      document.cookie = `bia_demo_auth=1; path=/; max-age=${60 * 60 * 8}`;
-      router.push("/analisis-bia");
-      return;
-    }
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    setError("Correo o contraseña incorrectos.");
-    setLoading(false);
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data?.error ?? "Correo o contraseña incorrectos.");
+        return;
+      }
+
+      router.push("/analisis-bia");
+    } catch (err) {
+      console.error("Error al iniciar sesión", err);
+      setError("No se pudo contactar al servidor. Inténtelo de nuevo.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { z } from "zod";
+import { requireApiSession } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
@@ -17,6 +18,10 @@ const PlanAccionSchema = z.object({
 
 // GET /api/plan?planId=1
 export async function GET(req: NextRequest) {
+  const { session, response } = requireApiSession();
+
+  if (!session) return response;
+
   try {
     const planId = req.nextUrl.searchParams.get("planId") ?? undefined;
 
@@ -53,6 +58,10 @@ export async function GET(req: NextRequest) {
 
 // POST /api/plan
 export async function POST(req: NextRequest) {
+  const { session, response } = requireApiSession();
+
+  if (!session) return response;
+
   try {
     const json = await req.json();
 
