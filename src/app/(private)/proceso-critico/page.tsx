@@ -70,8 +70,7 @@ const subAreas = [
 const tiposImpactoCat = [
   "Operativo",
   "Financiero",
-  "Reputacional",
-  "Ocupacional",  
+  "Reputacional", 
   "Regulatorio/Legal",
   "Tecnológico",
   "Seguridad de la Información",
@@ -80,7 +79,7 @@ const tiposImpactoCat = [
   "Rompimiento del órden constitucional",
   "Seguridad e integridad física",
   "Impacto a la confidencialidad, integridad y disponibilidad de la información.",
-  "Seguridad y Salud",
+  "Seguridad y Salud Ocupacional",
 ];
 
 const prioridades = ["Alta", "Media", "Baja"];
