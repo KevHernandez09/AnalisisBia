@@ -71,6 +71,7 @@ const tiposImpactoCat = [
   "Operativo",
   "Financiero",
   "Reputacional",
+  "Ocupacional",  
   "Regulatorio/Legal",
   "Tecnológico",
   "Seguridad de la Información",
