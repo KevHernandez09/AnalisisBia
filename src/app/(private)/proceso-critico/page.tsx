@@ -68,18 +68,29 @@ const subAreas = [
 ];
 
 const tiposImpactoCat = [
-  "Operativo",
-  "Financiero",
-  "Reputacional", 
-  "Regulatorio/Legal",
-  "Tecnológico",
-  "Seguridad de la Información",
+  "A la ciudadanía",
   "Ambiental",
-  "A la cuidadanía",
-  "Rompimiento del órden constitucional",
-  "Seguridad e integridad física",
+  "Clima Organizacional",
+  "Documental y Normativo",
+  "Económico",
+  "Financiero",
+  "Físicos",
+  "Gestión del Riesgo",
+  "Imagen institucional",
   "Impacto a la confidencialidad, integridad y disponibilidad de la información.",
+  "Ocupacional",
+  "Operativo",
+  "Organizacional",
+  "Planificación",
+  "Psicológico",
+  "Regulatorio/Legal",
+  "Reputacional", 
+  "Rompimiento del orden constitucional",
+  "Seguridad de la Información",
+  "Seguridad e integridad física",
+  "Seguridad y Salud de las personas",
   "Seguridad y Salud Ocupacional",
+  "Tecnológico",
 ];
 
 const prioridades = ["Alta", "Media", "Baja"];
