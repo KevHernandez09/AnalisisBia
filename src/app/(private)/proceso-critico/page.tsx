@@ -87,7 +87,7 @@ const tiposImpactoCat = [
   "Reputacional", 
   "Rompimiento del orden constitucional",
   "Seguridad de la Información",
-  "Seguridad e integridad física",
+  "Seguridad/integridad física",
   "Seguridad y Salud de las personas",
   "Seguridad y Salud Ocupacional",
   "Tecnológico",
