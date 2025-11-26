@@ -71,6 +71,7 @@ const tiposImpactoCat = [
   "A la ciudadanía",
   "Ambiental",
   "Clima Organizacional",
+  "Continuidad Operativa",
   "Documental y Normativo",
   "Económico",
   "Financiero",
