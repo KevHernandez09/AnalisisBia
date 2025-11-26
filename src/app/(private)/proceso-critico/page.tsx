@@ -78,7 +78,8 @@ const tiposImpactoCat = [
   "A la cuidadanía",
   "Rompimiento del órden constitucional",
   "Seguridad e integridad física",
-  "Impacto a la confidencialidad, integridad y disponibilidad de la información."
+  "Impacto a la confidencialidad, integridad y disponibilidad de la información.",
+  "Seguridad y Salud",
 ];
 
 const prioridades = ["Alta", "Media", "Baja"];
