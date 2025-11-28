@@ -47,7 +47,10 @@ export default function AnalisisBIA() {
     { id: "7", label: "Departamento de Asesoría Legal" },
     { id: "8", label: "Departamento de Prensa Institucional" },
     { id: "9", label: "Departamento de Seguridad Parlamentaria" },
-    { id: "10", label: "Departamento de Instituto de Formación e Investigación" },
+    {
+      id: "10",
+      label: "Departamento de Instituto de Formación e Investigación",
+    },
     { id: "11", label: "Departamento Análisis Presupuestario" },
     { id: "12", label: "Departamento de Comisiones Legislativas" },
     { id: "13", label: "Gerencia Administrativa" },
@@ -75,7 +78,10 @@ export default function AnalisisBIA() {
   // cerrar dropdown en click outside
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
         setSearch("");
       }
@@ -121,12 +127,21 @@ export default function AnalisisBIA() {
     load();
   }, [selected]);
 
-  // helper para color de badge de prioridad
+  // helper para color de badge de prioridad (MISMO esquema que el original)
   const prioridadColor = (p: string) => {
     const v = p.toLowerCase();
-    if (v.includes("alta")) return "bg-red-100 text-red-700 border-red-300";
-    if (v.includes("media")) return "bg-yellow-100 text-yellow-800 border-yellow-300";
-    if (v.includes("baja")) return "bg-emerald-100 text-emerald-700 border-emerald-300";
+    if (v.includes("alta")) {
+      // fondo rosado suave + rojo
+      return "bg-red-100 text-red-700 border-red-300";
+    }
+    if (v.includes("media")) {
+      // fondo amarillo suave
+      return "bg-yellow-100 text-yellow-800 border-yellow-300";
+    }
+    if (v.includes("baja")) {
+      // fondo verde suave
+      return "bg-emerald-100 text-emerald-700 border-emerald-300";
+    }
     return "bg-gray-100 text-gray-700 border-gray-300";
   };
 
@@ -154,7 +169,6 @@ export default function AnalisisBIA() {
       setErr(null);
       setOkMsg(null);
 
-      // Solo mandamos los campos que realmente existen en ProcesoCritico
       const payload = {
         nombre: draft.nombre,
         descripcion: draft.descripcion,
@@ -185,7 +199,6 @@ export default function AnalisisBIA() {
         throw new Error(j?.error || "Error al actualizar");
       }
 
-      // actualizamos el estado local
       setRows((prev) =>
         prev.map((r) => (r.id === editingId ? { ...r, ...draft } : r))
       );
@@ -201,111 +214,170 @@ export default function AnalisisBIA() {
   }
 
   return (
-    <section className="text-black px-6 pt-6">
-      <h1 className="text-3xl font-bold text-black mb-2">Análisis BIA</h1>
+    <section className="px-6 pt-6 pb-10">
+      {/* Header principal modernizado con colores del sistema */}
+      <div className="mb-6 rounded-2xl bg-white/70 border border-slate-200 shadow-sm px-5 py-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        {/* Título y descripción */}
+        <div>
+          <div className="inline-flex items-center gap-2 mb-1">
+            <span className="inline-flex items-center rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-700 border border-cyan-100">
+              Módulo de Visualización de Procesos Críticos
+            </span>
+          </div>
 
-      <p className="text-sm text-gray-600 mb-3">
-        Departamento:{" "}
-        <span className="font-medium">
-          {selected ? selectedLabel : "Ninguno"}
-        </span>{" "}
-        — Registros:{" "}
-        <span className="font-medium">{rows.length}</span>
-      </p>
+          <h1 className="text-2xl md:text-3xl font-semibold text-slate-900">
+            Análisis BIA
+          </h1>
 
+          <p className="mt-1 text-sm text-slate-600 max-w-2xl">
+            Visualice y actualice los procesos críticos asociados a cada
+            departamento, incluyendo parámetros de impacto, tiempos objetivo y
+            recursos necesarios.
+          </p>
+        </div>
+
+        {/* Resumen a la derecha */}
+        <div className="flex flex-col gap-2 text-sm">
+          <div className="rounded-xl bg-slate-900 text-slate-50 px-4 py-2 min-w-[220px]">
+            <p className="text-[11px] uppercase tracking-[0.16em] text-slate-300 mb-1">
+              Resumen de la vista
+            </p>
+            <p className="text-xs text-slate-200">
+              Departamento seleccionado:
+            </p>
+            <p className="text-sm font-semibold">
+              {selected ? selectedLabel : "Ninguno seleccionado"}
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between gap-4 text-[13px] text-slate-600">
+            <span className="flex items-center gap-1.5">
+              <span className="inline-flex h-2 w-2 rounded-full bg-cyan-500" />
+              Registros cargados:
+            </span>
+            <span className="font-semibold text-slate-900">{rows.length}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Mensajes de estado */}
       {okMsg && (
-        <div className="mb-3 rounded bg-emerald-50 border border-emerald-300 text-emerald-800 px-3 py-2 text-sm">
+        <div className="mb-3 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-800 px-3 py-2 text-sm">
           {okMsg}
         </div>
       )}
 
       {err && (
-        <div className="mb-3 rounded bg-red-50 border border-red-300 text-red-700 px-3 py-2 text-sm">
+        <div className="mb-3 rounded-xl bg-red-50 border border-red-200 text-red-700 px-3 py-2 text-sm">
           {err}
         </div>
       )}
 
-      {/* Combobox Moderno */}
-      <div className="relative max-w-xl mb-6" ref={dropdownRef}>
-        <button
-          type="button"
-          onClick={() => setOpen((p) => !p)}
-          className="
-            w-full flex items-center justify-between
-            px-4 py-3 rounded-xl bg-white border border-gray-300 shadow-sm
-            hover:border-[#0073a4] focus:border-[#0073a4]
-            focus:ring-2 focus:ring-[#0073a4]/30 transition-all
-            text-left text-[15px] font-medium text-gray-700
-          "
-        >
-          <span>{selectedLabel}</span>
-
-          <svg
-            className={`w-5 h-5 text-gray-500 transition-transform ${open ? "rotate-180" : "rotate-0"
-              }`}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-
-        {open && (
-          <div
-            className="
-              absolute mt-2 w-full bg-white border border-gray-200
-              rounded-xl shadow-xl z-10 max-h-64 overflow-hidden
-            "
-          >
-            <div className="p-2 border-b border-gray-200">
-              <input
-                type="text"
-                placeholder="Buscar departamento..."
-                value={search}
-                onClick={(e) => e.stopPropagation()}
-                onChange={(e) => setSearch(e.target.value)}
-                className="
-                  w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-300
-                  text-gray-700 text-sm transition-all outline-none
-                  focus:border-[#0073a4] focus:ring-2 focus:ring-[#0073a4]/30
-                "
-              />
-            </div>
-
-            <div className="max-h-56 overflow-y-auto">
-              {filtered.length > 0 ? (
-                filtered.map((op) => (
-                  <div
-                    key={op.id}
-                    className={`
-                      px-4 py-2.5 cursor-pointer text-sm transition-all
-                      ${selected === op.id
-                        ? "bg-[#0073a4]/10 text-[#0073a4] font-semibold"
-                        : "hover:bg-gray-100"
-                      }
-                    `}
-                    onClick={() => {
-                      setSelected(op.id);
-                      setOpen(false);
-                      setSearch("");
-                    }}
-                  >
-                    {op.label}
-                  </div>
-                ))
-              ) : (
-                <div className="px-4 py-3 text-gray-500 text-sm">
-                  No hay coincidencias
-                </div>
-              )}
-            </div>
+      {/* Card de filtro / combo de departamento */}
+      <div className="mb-6 rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm p-4">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-800">
+              Filtro por departamento
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Seleccione un departamento para consultar sus procesos críticos.
+            </p>
           </div>
-        )}
+
+          {/* Combobox Moderno */}
+          <div className="relative w-full md:w-80" ref={dropdownRef}>
+            <button
+              type="button"
+              onClick={() => setOpen((p) => !p)}
+              className="
+                w-full flex items-center justify-between
+                px-4 py-2.5 rounded-xl bg-white border border-slate-300 shadow-xs
+                hover:border-cyan-600 focus:border-cyan-600
+                focus:ring-2 focus:ring-cyan-500/20 transition-all
+                text-left text-[14px] font-medium text-slate-700
+              "
+            >
+              <span className="truncate">{selectedLabel}</span>
+
+              <svg
+                className={`w-4 h-4 text-slate-500 transition-transform ${
+                  open ? "rotate-180" : "rotate-0"
+                }`}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+
+            {open && (
+              <div
+                className="
+                  absolute mt-2 w-full bg-white border border-slate-200
+                  rounded-xl shadow-xl z-20 max-h-64 overflow-hidden
+                "
+              >
+                <div className="p-2 border-b border-slate-200 bg-slate-50/60">
+                  <input
+                    type="text"
+                    placeholder="Buscar departamento..."
+                    value={search}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="
+                      w-full px-3 py-2 rounded-lg bg-white border border-slate-300
+                      text-slate-700 text-xs outline-none
+                      focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500/30
+                    "
+                  />
+                </div>
+
+                <div className="max-h-56 overflow-y-auto">
+                  {filtered.length > 0 ? (
+                    filtered.map((op) => (
+                      <button
+                        key={op.id}
+                        type="button"
+                        className={`
+                          w-full text-left px-4 py-2.5 text-xs
+                          transition-all
+                          ${
+                            selected === op.id
+                              ? "bg-cyan-50 text-cyan-700 font-semibold"
+                              : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                          }
+                        `}
+                        onClick={() => {
+                          setSelected(op.id);
+                          setOpen(false);
+                          setSearch("");
+                        }}
+                      >
+                        {op.label}
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-4 py-3 text-slate-500 text-xs">
+                      No hay coincidencias.
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      {loading && <p className="mb-3 text-gray-600">Cargando…</p>}
+      {loading && (
+        <p className="mb-3 text-slate-600 text-sm">Cargando procesos…</p>
+      )}
 
       {/* Vista tarjetas con edición */}
       {rows.length > 0 ? (
@@ -317,40 +389,42 @@ export default function AnalisisBIA() {
             return (
               <article
                 key={r.id}
-                className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden"
+                className="bg-white/90 border border-slate-200 rounded-2xl shadow-sm overflow-hidden"
               >
                 {/* Header de la tarjeta */}
-                <header className="px-4 py-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between bg-slate-50 border-b border-gray-200">
+                <header className="px-4 py-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between bg-[#0073A4] text-white rounded-t-xl">
+
                   <div className="space-y-1">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white-500">
                       {data.area || "Área no especificada"}
                     </p>
 
                     {isEditing ? (
                       <input
-                        className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm"
+                        className="w-full border border-white-300 rounded-md px-2 py-1 text-sm text-white outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500"
                         value={data.nombre}
-                        onChange={(e) => handleDraftChange("nombre", e.target.value)}
+                        onChange={(e) =>
+                          handleDraftChange("nombre", e.target.value)
+                        }
                       />
                     ) : (
-                      <h2 className="text-lg font-semibold text-slate-900">
+                      <h2 className="text-base md:text-lg font-semibold text-white">
                         {data.nombre}
                       </h2>
                     )}
                   </div>
 
                   <div className="flex flex-wrap gap-2 items-center">
-                    {/* tipoImpacto solo lectura, prioridad editable */}
                     {data.tipoImpacto && (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full border text-xs font-medium bg-sky-50 border-sky-200 text-sky-700">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full border text-[11px] font-medium bg-sky-50 border-sky-200 text-sky-700">
                         Impacto: {data.tipoImpacto}
                       </span>
                     )}
 
                     {isEditing ? (
                       <select
-                        className="border border-gray-300 rounded-full px-3 py-1 text-xs"
-                        value={data.prioridad}
+                        className="border border-slate-300 rounded-full px-3 py-1 text-[11px] text-slate-700 outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500 bg-white"
+                        value={data.prioridad ?? ""}
                         onChange={(e) =>
                           handleDraftChange("prioridad", e.target.value)
                         }
@@ -365,7 +439,7 @@ export default function AnalisisBIA() {
                     ) : (
                       data.prioridad && (
                         <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full border text-xs font-semibold ${prioridadColor(
+                          className={`inline-flex items-center px-3 py-1 rounded-full border text-[11px] font-semibold ${prioridadColor(
                             data.prioridad
                           )}`}
                         >
@@ -382,7 +456,7 @@ export default function AnalisisBIA() {
                             type="button"
                             onClick={saveEdit}
                             disabled={savingId === r.id}
-                            className="px-3 py-1 rounded-md bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-500 disabled:opacity-60"
+                            className="px-3 py-1 rounded-md bg-[#0073a4] text-white text-[11px] font-semibold hover:bg-[#0087c4] disabled:opacity-60"
                           >
                             {savingId === r.id ? "Guardando..." : "Guardar"}
                           </button>
@@ -390,7 +464,7 @@ export default function AnalisisBIA() {
                             type="button"
                             onClick={cancelEdit}
                             disabled={savingId === r.id}
-                            className="px-3 py-1 rounded-md border border-gray-300 text-xs text-gray-700 hover:bg-gray-50"
+                            className="px-3 py-1 rounded-md border border-slate-300 text-[11px] text-slate-700 hover:bg-slate-50"
                           >
                             Cancelar
                           </button>
@@ -399,7 +473,7 @@ export default function AnalisisBIA() {
                         <button
                           type="button"
                           onClick={() => startEdit(r)}
-                          className="px-3 py-1 rounded-md border border-yellow-300 text-xs text-black-700 bg-yellow-50"
+                          className="px-3 py-1 rounded-md border border-amber-300 text-[11px] text-amber-800 bg-amber-50 hover:bg-amber-100"
                         >
                           Editar
                         </button>
@@ -409,16 +483,16 @@ export default function AnalisisBIA() {
                 </header>
 
                 {/* Contenido */}
-                <div className="px-4 py-3 grid gap-4 md:grid-cols-2">
+                <div className="px-4 py-4 grid gap-4 md:grid-cols-2">
                   {/* Columna izquierda */}
                   <div className="space-y-3 text-sm">
                     <div>
-                      <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                      <h3 className="text-[11px] font-semibold text-slate-500 uppercase mb-1">
                         Descripción del proceso crítico
                       </h3>
                       {isEditing ? (
                         <textarea
-                          className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                          className="w-full border border-slate-300 rounded-md px-2 py-1 text-sm text-slate-800 resize-y outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500"
                           rows={3}
                           value={data.descripcion}
                           onChange={(e) =>
@@ -434,12 +508,12 @@ export default function AnalisisBIA() {
 
                     <div className="grid gap-2 md:grid-cols-2">
                       <div>
-                        <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                        <h3 className="text-[11px] font-semibold text-slate-500 uppercase mb-1">
                           Entradas
                         </h3>
                         {isEditing ? (
                           <textarea
-                            className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                            className="w-full border border-slate-300 rounded-md px-2 py-1 text-sm text-slate-800 resize-y outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500"
                             rows={2}
                             value={data.entradas}
                             onChange={(e) =>
@@ -453,12 +527,12 @@ export default function AnalisisBIA() {
                         )}
                       </div>
                       <div>
-                        <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                        <h3 className="text-[11px] font-semibold text-slate-500 uppercase mb-1">
                           Salidas
                         </h3>
                         {isEditing ? (
                           <textarea
-                            className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                            className="w-full border border-slate-300 rounded-md px-2 py-1 text-sm text-slate-800 resize-y outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500"
                             rows={2}
                             value={data.salidas}
                             onChange={(e) =>
@@ -474,12 +548,12 @@ export default function AnalisisBIA() {
                     </div>
 
                     <div>
-                      <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                      <h3 className="text-[11px] font-semibold text-slate-500 uppercase mb-1">
                         Partes interesadas (usuarios)
                       </h3>
                       {isEditing ? (
                         <textarea
-                          className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                          className="w-full border border-slate-300 rounded-md px-2 py-1 text-sm text-slate-800 resize-y outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500"
                           rows={2}
                           value={data.partes}
                           onChange={(e) =>
@@ -498,12 +572,12 @@ export default function AnalisisBIA() {
                   <div className="space-y-3 text-sm">
                     <div className="grid gap-2 md:grid-cols-3">
                       <div>
-                        <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                        <h3 className="text-[11px] font-semibold text-slate-500 uppercase mb-1">
                           RTO
                         </h3>
                         {isEditing ? (
                           <input
-                            className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm"
+                            className="w-full border border-slate-300 rounded-md px-2 py-1 text-sm text-slate-800 outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500"
                             value={data.rto}
                             onChange={(e) =>
                               handleDraftChange("rto", e.target.value)
@@ -514,12 +588,12 @@ export default function AnalisisBIA() {
                         )}
                       </div>
                       <div>
-                        <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                        <h3 className="text-[11px] font-semibold text-slate-500 uppercase mb-1">
                           MTPD
                         </h3>
                         {isEditing ? (
                           <input
-                            className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm"
+                            className="w-full border border-slate-300 rounded-md px-2 py-1 text-sm text-slate-800 outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500"
                             value={data.mtpd}
                             onChange={(e) =>
                               handleDraftChange("mtpd", e.target.value)
@@ -530,12 +604,12 @@ export default function AnalisisBIA() {
                         )}
                       </div>
                       <div>
-                        <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                        <h3 className="text-[11px] font-semibold text-slate-500 uppercase mb-1">
                           RPO
                         </h3>
                         {isEditing ? (
                           <input
-                            className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm"
+                            className="w-full border border-slate-300 rounded-md px-2 py-1 text-sm text-slate-800 outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500"
                             value={data.rpo}
                             onChange={(e) =>
                               handleDraftChange("rpo", e.target.value)
@@ -548,16 +622,19 @@ export default function AnalisisBIA() {
                     </div>
 
                     <div>
-                      <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                      <h3 className="text-[11px] font-semibold text-slate-500 uppercase mb-1">
                         Sincronización con otros procesos
                       </h3>
                       {isEditing ? (
                         <textarea
-                          className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                          className="w-full border border-slate-300 rounded-md px-2 py-1 text-sm text-slate-800 resize-y outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500"
                           rows={2}
                           value={data.sincronizacion}
                           onChange={(e) =>
-                            handleDraftChange("sincronizacion", e.target.value)
+                            handleDraftChange(
+                              "sincronizacion",
+                              e.target.value
+                            )
                           }
                         />
                       ) : (
@@ -569,12 +646,12 @@ export default function AnalisisBIA() {
 
                     <div className="grid gap-2 md:grid-cols-2">
                       <div>
-                        <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                        <h3 className="text-[11px] font-semibold text-slate-500 uppercase mb-1">
                           Recursos necesarios
                         </h3>
                         {isEditing ? (
                           <textarea
-                            className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                            className="w-full border border-slate-300 rounded-md px-2 py-1 text-sm text-slate-800 resize-y outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500"
                             rows={2}
                             value={data.recursos}
                             onChange={(e) =>
@@ -588,12 +665,12 @@ export default function AnalisisBIA() {
                         )}
                       </div>
                       <div>
-                        <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                        <h3 className="text-[11px] font-semibold text-slate-500 uppercase mb-1">
                           Requisitos legales y normativos
                         </h3>
                         {isEditing ? (
                           <textarea
-                            className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                            className="w-full border border-slate-300 rounded-md px-2 py-1 text-sm text-slate-800 resize-y outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500"
                             rows={2}
                             value={data.requisitos}
                             onChange={(e) =>
@@ -609,12 +686,12 @@ export default function AnalisisBIA() {
                     </div>
 
                     <div>
-                      <h3 className="text-xs font-semibold text-slate-500 uppercase mb-1">
+                      <h3 className="text-[11px] font-semibold text-slate-500 uppercase mb-1">
                         Descripción del impacto
                       </h3>
                       {isEditing ? (
                         <textarea
-                          className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm resize-y"
+                          className="w-full border border-slate-300 rounded-md px-2 py-1 text-sm text-slate-800 resize-y outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500"
                           rows={3}
                           value={data.descImpacto}
                           onChange={(e) =>
@@ -634,10 +711,10 @@ export default function AnalisisBIA() {
           })}
         </div>
       ) : (
-        <div className="mt-6 border rounded-xl bg-gray-50 px-4 py-6 text-center text-gray-500 italic">
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-center text-slate-500 text-sm italic">
           {selected
             ? "No hay registros de análisis BIA para este departamento."
-            : "Seleccione un departamento para ver datos."}
+            : "Seleccione un departamento para visualizar los procesos críticos asociados."}
         </div>
       )}
     </section>
