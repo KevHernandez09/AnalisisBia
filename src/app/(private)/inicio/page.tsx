@@ -55,12 +55,22 @@ const PRIORIDAD_LABELS: Record<string, string> = {
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  Alta: "#ef4444", 
-  Media: "#eab308", 
-  Baja: "#22c55e", 
+  Alta: "#ef4444", // rojo
+  Media: "#eab308", // amarillo
+  Baja: "#22c55e", // verde
 };
 
 const PRIORITY_ORDER: ("Alta" | "Media" | "Baja")[] = ["Alta", "Media", "Baja"];
+
+// Paleta para barras de estrategias por tipo
+const STRATEGY_COLORS = [
+  "#38bdf8", // cyan
+  "#22c55e", // verde
+  "#eab308", // amarillo
+  "#f97316", // naranja
+  "#6366f1", // violeta
+  "#ec4899", // rosado
+];
 
 function PriorityLegend({
   items,
@@ -290,12 +300,22 @@ export default function InicioPage() {
                   <BarChart data={stats.estrategiasPorTipo}>
                     <XAxis dataKey="tipo" tick={{ fontSize: 11 }} />
                     <YAxis />
-                    <Tooltip />
-                    <Bar
-                      dataKey="count"
-                      fill="#38bdf8"
-                      radius={[6, 6, 0, 0]}
+                    <Tooltip
+                      formatter={(value: any, _name: any, props: any) => [
+                        `${value} estrategias`,
+                        props.payload.tipo,
+                      ]}
                     />
+                    <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+                      {stats.estrategiasPorTipo.map((entry, index) => (
+                        <Cell
+                          key={`bar-${entry.tipo}-${index}`}
+                          fill={
+                            STRATEGY_COLORS[index % STRATEGY_COLORS.length]
+                          }
+                        />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
