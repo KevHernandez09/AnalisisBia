@@ -1,10 +1,34 @@
 // prisma/seed.cjs
 const { PrismaClient } = require("@prisma/client");
+const bcrypt = require("bcryptjs");
+
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Iniciando seed de planes...");
+  console.log("🌱 Iniciando seed...");
 
+  // 1) Crear/actualizar usuario admin
+  const adminEmail = "admin@institucion.go.cr";
+  const adminPassword = "admin123";
+
+  const passwordHash = await bcrypt.hash(adminPassword, 10);
+
+  await prisma.user.upsert({
+    where: { email: adminEmail },
+    update: {
+      passwordHash,
+      name: "Administrador BIA",
+    },
+    create: {
+      email: adminEmail,
+      passwordHash,
+      name: "Administrador BIA",
+    },
+  });
+
+  console.log("✅ Usuario admin asegurado en la BD.");
+
+  // 2) Seed de planes (lo que ya tienes)
   const planesData = [
     {
       id: "1",
@@ -14,7 +38,7 @@ async function main() {
     {
       id: "2",
       nombre: "Plan de Recuperación",
-      descripcion: "Plan para la recuperación de servicios y procesos",
+      descripcion: "Plan para la recuperación de operaciones críticas",
     },
     {
       id: "3",
@@ -34,7 +58,7 @@ async function main() {
     });
   }
 
-  console.log("✅ Seed completado: Planes creados/actualizados.");
+  console.log("✅ Seed completado: Usuario y planes creados/actualizados.");
 }
 
 main()

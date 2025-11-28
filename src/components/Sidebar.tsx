@@ -77,30 +77,30 @@ export default function Sidebar() {
     },
   ];
 
-  function handleLogout() {
-    document.cookie = "bia_demo_auth=; path=/; max-age=0";
-    router.push("/login");
+  async function handleLogout() {
+    try {
+      await fetch("/api/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) {
+      console.error("Error al cerrar sesión:", err);
+    } finally {
+      router.replace("/login");
+    }
   }
 
   return (
     <aside
-      className={`
-        ${collapsed ? "w-20" : "w-64"}
-        min-h-screen
-        bg-gradient-to-b from-[#004a73] via-[#003a5f] to-[#001f33]
-        text-slate-100 border-r border-slate-900/70
-        flex flex-col select-none
-        shadow-xl shadow-black/40
-        transition-all duration-300
-      `}
+      className={`${collapsed ? "w-20" : "w-64"
+        } min-h-screen bg-gradient-to-b from-[#004a73] via-[#003a5f] to-[#001f33]
+        text-slate-100 border-r border-slate-900/70 flex flex-col select-none
+        shadow-xl shadow-black/40 transition-all duration-300`}
     >
       {/* LOGO / HEADER */}
       <div
-        className={`
-          px-4 py-5 border-b border-white/10
-          flex items-center
-          ${collapsed ? "justify-center" : "justify-between"}
-        `}
+        className={`px-4 py-5 border-b border-white/10 flex items-center ${collapsed ? "justify-center" : "justify-between"
+          }`}
       >
         <div className="flex items-center gap-3">
           <div className={`${collapsed ? "w-9 h-9" : "w-12 h-12"} relative`}>
@@ -127,11 +127,7 @@ export default function Sidebar() {
         <button
           type="button"
           onClick={() => setCollapsed((p) => !p)}
-          className="
-            w-8 h-8 grid place-content-center
-            rounded-full bg-white/10 border border-white/20
-            hover:bg-white/20 transition
-          "
+          className="w-8 h-8 grid place-content-center rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition"
         >
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
@@ -156,16 +152,11 @@ export default function Sidebar() {
                     <Link
                       href={href}
                       title={collapsed ? label : ""}
-                      className={`
-                        flex items-center gap-3 px-4 py-2.5 text-sm
-                        transition-colors rounded-r-full
-                        ${collapsed ? "justify-center rounded-full mx-2" : ""}
-                        ${
-                          active
-                            ? "bg-white/15 text-white font-medium shadow-inner"
-                            : "text-white/80 hover:bg-white/10"
-                        }
-                      `}
+                      className={`flex items-center gap-3 px-4 py-2.5 text-sm transition-colors rounded-r-full ${collapsed ? "justify-center rounded-full mx-2" : ""
+                        } ${active
+                          ? "bg-white/15 text-white font-medium shadow-inner"
+                          : "text-white/80 hover:bg-white/10"
+                        }`}
                     >
                       {icon}
                       {!collapsed && <span className="truncate">{label}</span>}
@@ -174,12 +165,7 @@ export default function Sidebar() {
                     {/* Tooltip */}
                     {collapsed && (
                       <span
-                        className="
-                          pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3
-                          whitespace-nowrap rounded-md bg-black/80 text-xs text-white px-2 py-1
-                          opacity-0 invisible group-hover:opacity-100 group-hover:visible
-                          transition-opacity
-                        "
+                        className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 whitespace-nowrap rounded-md bg-black/80 text-xs text-white px-2 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity"
                       >
                         {label}
                       </span>
@@ -196,9 +182,8 @@ export default function Sidebar() {
       <div className="mt-auto border-t border-white/10 px-4 py-4 space-y-3 text-sm">
         <Link
           href="/soporte"
-          className={`flex items-center gap-3 text-white/80 hover:text-white transition ${
-            collapsed ? "justify-center" : ""
-          }`}
+          className={`flex items-center gap-3 text-white/80 hover:text-white transition ${collapsed ? "justify-center" : ""
+            }`}
         >
           <LifeBuoy size={18} />
           {!collapsed && <span>Soporte Técnico</span>}
@@ -206,9 +191,8 @@ export default function Sidebar() {
 
         <Link
           href="/guia-usuario"
-          className={`flex items-center gap-3 text-white/80 hover:text-white transition ${
-            collapsed ? "justify-center" : ""
-          }`}
+          className={`flex items-center gap-3 text-white/80 hover:text-white transition ${collapsed ? "justify-center" : ""
+            }`}
         >
           <BookOpen size={18} />
           {!collapsed && <span>Guía del Usuario</span>}
@@ -216,9 +200,8 @@ export default function Sidebar() {
 
         <button
           onClick={handleLogout}
-          className={`flex items-center gap-3 text-red-200 hover:text-red-400 transition ${
-            collapsed ? "justify-center" : ""
-          }`}
+          className={`flex items-center gap-3 text-red-200 hover:text-red-400 transition ${collapsed ? "justify-center" : ""
+            }`}
         >
           <LogOut size={18} />
           {!collapsed && <span>Cerrar sesión</span>}

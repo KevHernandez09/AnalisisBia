@@ -1,44 +1,56 @@
-// src/app/login/page.tsx
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-const DEFAULT_EMAIL = "admin@institucion.go.cr";
-const DEFAULT_PASSWORD = "admin123";
-
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState(DEFAULT_EMAIL);
-  const [password, setPassword] = useState(DEFAULT_PASSWORD);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    if (email === DEFAULT_EMAIL && password === DEFAULT_PASSWORD) {
-      // Marca sesión de demo (cookie sencilla)
-      document.cookie = `bia_demo_auth=1; path=/; max-age=${60 * 60 * 8}`;
-      router.push("/analisis-bia");
-      return;
-    }
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+        }),
+      });
 
-    setError("Correo o contraseña incorrectos.");
-    setLoading(false);
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        setError(data.error || "Correo o contraseña incorrectos.");
+        return;
+      }
+
+      // Cookie ya viene seteada → redirigimos
+      router.replace("/analisis-bia");
+    } catch (err) {
+      console.error("Error al hacer login:", err);
+      setError("Ocurrió un error al conectar con el servidor.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 relative overflow-hidden">
-      {/* Capa de brillo horizontal */}
+      {/* Capa decorativa */}
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_left,_rgba(56,189,248,0.22),_transparent_70%),_radial-gradient(circle_at_right,_rgba(59,130,246,0.22),_transparent_70%)]" />
 
       <div className="relative z-10 w-full max-w-5xl px-4 md:px-8">
         <div className="grid md:grid-cols-2 gap-10 items-center">
-          {/* Lado izquierdo */}
+          {/* Lado informativo */}
           <div className="hidden md:flex flex-col gap-6 text-slate-100">
             <div className="flex items-center gap-3">
               <div className="relative h-12 w-12 rounded-2xl bg-slate-900/70 border border-slate-700/70 flex items-center justify-center overflow-hidden">
@@ -61,8 +73,7 @@ export default function LoginPage() {
 
             <p className="text-slate-300 text-sm leading-relaxed max-w-md">
               Plataforma para administrar estrategias de prevención, contingencia,
-              recuperación y comunicación/divulgación asociadas a procesos críticos
-              por área de la institución.
+              recuperación y divulgación asociadas a procesos críticos por área.
             </p>
 
             <div className="flex flex-col gap-3 text-sm text-slate-300">
@@ -70,24 +81,24 @@ export default function LoginPage() {
                 <span className="h-8 w-8 rounded-xl border border-slate-500/70 flex items-center justify-center text-xs">
                   1
                 </span>
-                <span>Consulta estrategias por departamento y proceso crítico.</span>
+                Consulta estrategias por departamento y proceso crítico.
               </div>
               <div className="flex items-center gap-3">
                 <span className="h-8 w-8 rounded-xl border border-slate-500/70 flex items-center justify-center text-xs">
                   2
                 </span>
-                <span>Documenta pruebas, simulacros y resultados de continuidad.</span>
+                Documenta simulacros, pruebas y resultados de continuidad.
               </div>
               <div className="flex items-center gap-3">
                 <span className="h-8 w-8 rounded-xl border border-slate-500/70 flex items-center justify-center text-xs">
                   3
                 </span>
-                <span>Consulta el análisis BIA.</span>
+                Consulta el análisis BIA institucional.
               </div>
             </div>
           </div>
 
-          {/* Lado derecho: tarjeta de login */}
+          {/* Tarjeta de login */}
           <div className="backdrop-blur-xl bg-slate-900/70 border border-slate-700/70 shadow-2xl shadow-slate-900/80 rounded-2xl p-6 md:p-8">
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -111,27 +122,39 @@ export default function LoginPage() {
 
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div>
-                <label className="block text-xs font-semibold text-slate-200 mb-1.5">
+                <label
+                  htmlFor="email"
+                  className="block text-xs font-semibold text-slate-200 mb-1.5"
+                >
                   Correo electrónico
                 </label>
                 <input
+                  id="email"
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                  placeholder="usuario@institucion.go.cr"
                   className="w-full rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-200 mb-1.5">
+                <label
+                  htmlFor="password"
+                  className="block text-xs font-semibold text-slate-200 mb-1.5"
+                >
                   Contraseña
                 </label>
                 <input
+                  id="password"
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                  placeholder="********"
                   className="w-full rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all"
                 />
               </div>
@@ -141,7 +164,7 @@ export default function LoginPage() {
                 disabled={loading}
                 className="mt-2 w-full rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg hover:from-cyan-400 hover:to-blue-400 transition-all disabled:opacity-60"
               >
-                {loading ? "Validando..." : "Entrar"} 
+                {loading ? "Validando..." : "Entrar"}
               </button>
             </form>
           </div>

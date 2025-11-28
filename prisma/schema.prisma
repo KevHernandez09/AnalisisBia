@@ -1,3 +1,6 @@
+// -------------------------------------------------------------
+// GENERATOR & DATASOURCE
+// -------------------------------------------------------------
 generator client {
   provider = "prisma-client-js"
 }
@@ -6,58 +9,93 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// -------------------------------------------------------------
+// MODELO DE USUARIO + AUDITORÍA DE SESIONES
+// -------------------------------------------------------------
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String        @id @default(cuid())
+  email        String        @unique
   passwordHash String
   name         String?
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  // Relación 1:N con sesiones
+  sessions     UserSession[]
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
+
+model UserSession {
+  id        String   @id @default(cuid())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  loginAt   DateTime @default(now())
+  logoutAt  DateTime?     // null si no ha salido
+
+  ip        String?
+  userAgent String?
+}
+
+// -------------------------------------------------------------
+// ENUMS
+// -------------------------------------------------------------
 enum Prioridad {
   Alta
   Media
   Baja
 }
 
+// -------------------------------------------------------------
+// PROCESOS CRÍTICOS
+// -------------------------------------------------------------
 model ProcesoCritico {
-  id             String    @id @default(cuid())
+  id             String         @id @default(cuid())
   nombre         String
   descripcion    String
-  entradas       String    @default("")
-  salidas        String    @default("")
-  partes         String    @default("")
-  sincronizacion String    @default("")
-  rto            String    @default("")
-  mtpd           String    @default("")
-  rpo            String    @default("")
-  recursos       String    @default("")
-  requisitos     String    @default("")
-  descImpacto    String    @default("")
+  entradas       String         @default("")
+  salidas        String         @default("")
+  partes         String         @default("")
+  sincronizacion String         @default("")
+  rto            String         @default("")
+  mtpd           String         @default("")
+  rpo            String         @default("")
+  recursos       String         @default("")
+  requisitos     String         @default("")
+  descImpacto    String         @default("")
   prioridad      Prioridad
 
-  areas    ProcesoArea[]
-  impactos ProcesoImpact[]
+  areas          ProcesoArea[]
+  impactos       ProcesoImpact[]
 
-  subAreas ProcesoSubarea[]
+  subAreas       ProcesoSubarea[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 }
 
+// -------------------------------------------------------------
+// ÁREAS, SUBÁREAS Y RELACIONES
+// -------------------------------------------------------------
 model Area {
-  id          String           @id // "1".."19"
-  label       String           @unique // nombre del departamento
+  id          String           @id
+  label       String           @unique
+
   usos        ProcesoArea[]
-  subAreas    SubArea[] // 🔹 subáreas del departamento
+  subAreas    SubArea[]
   estrategias EstrategiaArea[]
 }
 
-model ImpactType {
-  id   Int             @id @default(autoincrement())
-  name String          @unique
-  usos ProcesoImpact[]
+model SubArea {
+  id        String @id
+  label     String @unique
+
+  areaId    String
+  area      Area   @relation(fields: [areaId], references: [id])
+
+  procesos  ProcesoSubarea[] @relation("SubareaToProceso")
 }
 
 model ProcesoArea {
@@ -70,6 +108,25 @@ model ProcesoArea {
   @@id([procesoId, areaId])
 }
 
+model ProcesoSubarea {
+  procesoId String
+  subareaId String
+
+  proceso ProcesoCritico @relation(fields: [procesoId], references: [id], onDelete: Cascade)
+  subarea SubArea        @relation("SubareaToProceso", fields: [subareaId], references: [id], onDelete: Cascade)
+
+  @@id([procesoId, subareaId])
+}
+
+// -------------------------------------------------------------
+// IMPACTOS
+// -------------------------------------------------------------
+model ImpactType {
+  id   Int             @id @default(autoincrement())
+  name String          @unique
+  usos ProcesoImpact[]
+}
+
 model ProcesoImpact {
   procesoId    String
   impactTypeId Int
@@ -80,49 +137,30 @@ model ProcesoImpact {
   @@id([procesoId, impactTypeId])
 }
 
-model SubArea {
-  id     String @id
-  label  String @unique
-  areaId String
-  area   Area   @relation(fields: [areaId], references: [id])
-
-  procesos ProcesoSubarea[] @relation("SubareaToProceso")
-}
-
-model ProcesoSubarea {
-  procesoId String
-  subareaId String
-
-  proceso ProcesoCritico @relation(fields: [procesoId], references: [id], onDelete: Cascade)
-
-  subarea SubArea @relation("SubareaToProceso", fields: [subareaId], references: [id], onDelete: Cascade)
-
-  @@id([procesoId, subareaId])
-}
-
+// -------------------------------------------------------------
+// ESTRATEGIAS
+// -------------------------------------------------------------
 model Estrategia {
-  id String @id @default(cuid())
+  id                 String       @id @default(cuid())
 
-  // Lo que viene del formulario:
   nombreProceso      String
   descripcionProceso String
-  tipo               String // ej.: "Estrategias de prevención"
+  tipo               String
 
   soluciones        String
-  recursos          String @default("")
-  responsabilidades String @default("")
-  roles             String @default("")
-  estructura        String @default("")
-  actividades       String @default("")
-  frecuencias       String @default("")
-  resultados        String @default("")
-  monitoreo         String @default("")
+  recursos          String        @default("")
+  responsabilidades String        @default("")
+  roles             String        @default("")
+  estructura        String        @default("")
+  actividades       String        @default("")
+  frecuencias       String        @default("")
+  resultados        String        @default("")
+  monitoreo         String        @default("")
 
-  // Relación N:M con Area (departamentos del combo)
-  areas EstrategiaArea[]
+  areas             EstrategiaArea[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 }
 
 model EstrategiaArea {
@@ -135,6 +173,9 @@ model EstrategiaArea {
   @@id([estrategiaId, areaId])
 }
 
+// -------------------------------------------------------------
+// PLANES Y ACCIONES
+// -------------------------------------------------------------
 model Plan {
   id          String       @id @default(cuid())
   nombre      String
