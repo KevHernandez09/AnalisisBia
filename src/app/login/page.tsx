@@ -34,7 +34,7 @@ export default function LoginPage() {
       }
 
       // Cookie ya viene seteada → redirigimos
-      router.replace("/analisis-bia");
+      router.replace("/inicio");
     } catch (err) {
       console.error("Error al hacer login:", err);
       setError("Ocurrió un error al conectar con el servidor.");
@@ -63,7 +63,7 @@ export default function LoginPage() {
               </div>
               <div>
                 <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">
-                  Sistema- PCSAL
+                  Sistema- WRMJ
                 </p>
                 <h1 className="text-2xl font-semibold leading-tight">
                   Gestión de Procesos Críticos
