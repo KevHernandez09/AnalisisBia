@@ -312,7 +312,7 @@ export default function InicioPage() {
               />
               <StatCard
                 icon={<Workflow size={22} />}
-                label="Subáreas"
+                label="Áreas"
                 value={stats.totalSubAreas}
               />
               <StatCard
@@ -327,7 +327,7 @@ export default function InicioPage() {
               />
               <StatCard
                 icon={<ShieldCheck size={22} />}
-                label="Planes"
+                label="Planes de Acción"
                 value={stats.totalPlanes}
               />
             </section>
