@@ -263,7 +263,7 @@ export default function InicioPage() {
               <div className="relative h-16 w-16 md:h-20 md:w-20">
                 <div className="absolute inset-0 rounded-2xl bg-white/70 shadow-sm" />
                 <Image
-                  src="/logo-institucion.png"
+                  src="/logo.png"
                   alt="Logo Institucional"
                   fill
                   className="object-contain p-2"

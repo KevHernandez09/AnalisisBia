@@ -9,6 +9,7 @@ import {
   Leaf,
   Landmark,
   ChevronRight,
+  Check,
 } from "lucide-react";
 
 type PlanSection = {
@@ -28,7 +29,7 @@ type Plan = {
   subtitle: string;
   objective: string;
   scenarios: string[];
-  activation?: string[]; // para los planes que tienen “Activación inicial” en bullets/lines
+  activation?: string[];
   sections: PlanSection[];
   committees?: string[];
 };
@@ -37,13 +38,46 @@ function classNames(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
-const planMeta: Record<Plan["id"], { short: string; icon: ReactNode }> = {
-  naturales: { short: "Naturales", icon: <CloudLightning size={16} /> },
-  tecnologicos: { short: "Tecnológicos", icon: <Cpu size={16} /> },
-  sanitarios: { short: "Sanitarios", icon: <Skull size={16} /> },
-  "seguridad-fisica": { short: "Seguridad física", icon: <ShieldAlert size={16} /> },
-  ambientales: { short: "Ambientales", icon: <Leaf size={16} /> },
-  politica: { short: "Naturaleza política", icon: <Landmark size={16} /> },
+const planMeta: Record<
+  Plan["id"],
+  { short: string; icon: ReactNode; accent: string; soft: string }
+> = {
+  naturales: {
+    short: "Naturales",
+    icon: <CloudLightning size={16} />,
+    accent: "from-sky-500 to-indigo-500",
+    soft: "bg-sky-500/10 text-sky-700 ring-sky-200/70",
+  },
+  tecnologicos: {
+    short: "Tecnológicos",
+    icon: <Cpu size={16} />,
+    accent: "from-violet-500 to-fuchsia-500",
+    soft: "bg-violet-500/10 text-violet-700 ring-violet-200/70",
+  },
+  sanitarios: {
+    short: "Sanitarios",
+    icon: <Skull size={16} />,
+    accent: "from-rose-500 to-orange-500",
+    soft: "bg-rose-500/10 text-rose-700 ring-rose-200/70",
+  },
+  "seguridad-fisica": {
+    short: "Seguridad física",
+    icon: <ShieldAlert size={16} />,
+    accent: "from-amber-500 to-yellow-500",
+    soft: "bg-amber-500/10 text-amber-800 ring-amber-200/70",
+  },
+  ambientales: {
+    short: "Ambientales",
+    icon: <Leaf size={16} />,
+    accent: "from-emerald-500 to-lime-500",
+    soft: "bg-emerald-500/10 text-emerald-800 ring-emerald-200/70",
+  },
+  politica: {
+    short: "Naturaleza política",
+    icon: <Landmark size={16} />,
+    accent: "from-slate-700 to-slate-900",
+    soft: "bg-slate-900/10 text-slate-800 ring-slate-200/70",
+  },
 };
 
 function TabButton({
@@ -66,13 +100,23 @@ function TabButton({
       role="tab"
       aria-selected={active}
       className={classNames(
-        "group inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm transition",
+        "group relative inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm transition",
         "focus:outline-none focus:ring-2 focus:ring-slate-300",
         active
-          ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-          : "bg-white/80 text-slate-700 border-slate-200 hover:bg-white"
+          ? "border-slate-900 bg-slate-900 text-white shadow-sm"
+          : "border-slate-200 bg-white/70 text-slate-700 hover:bg-white"
       )}
     >
+      {active ? (
+        <span
+          className={classNames(
+            "pointer-events-none absolute inset-x-1 -bottom-2 h-1 rounded-full bg-gradient-to-r opacity-90",
+            meta.accent
+          )}
+          aria-hidden="true"
+        />
+      ) : null}
+
       <span
         className={classNames(
           "grid place-content-center rounded-full border p-1 transition",
@@ -98,19 +142,34 @@ function TabButton({
   );
 }
 
-function InfoCard({
+function GlassCard({
   title,
+  accent,
   children,
+  className,
 }: {
   title: string;
+  accent: string;
   children: ReactNode;
+  className?: string;
 }) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <header className="px-5 pt-5 pb-3 border-b border-slate-100">
+    <section
+      className={classNames(
+        "relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/75 shadow-sm backdrop-blur",
+        className
+      )}
+    >
+      <div
+        className={classNames(
+          "pointer-events-none absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r opacity-90",
+          accent
+        )}
+      />
+      <header className="px-5 pt-5 pb-3">
         <h3 className="text-base font-semibold text-slate-900">{title}</h3>
       </header>
-      <div className="px-5 py-4">{children}</div>
+      <div className="px-5 pb-5">{children}</div>
     </section>
   );
 }
@@ -118,13 +177,13 @@ function InfoCard({
 function BulletList({ items }: { items: string[] }) {
   return (
     <ul className="space-y-2.5 text-sm text-slate-700">
-      {items.map((item) => (
-        <li key={item} className="flex gap-2.5">
+      {items.map((item, idx) => (
+        <li key={`${idx}-${item.slice(0, 24)}`} className="flex gap-2.5">
           <span
-            className="mt-1.5 h-5 w-5 rounded-full bg-slate-100 text-slate-600 grid place-content-center shrink-0"
+            className="mt-0.5 grid h-6 w-6 place-content-center rounded-full bg-white text-slate-600 ring-1 ring-slate-200 shrink-0"
             aria-hidden="true"
           >
-            •
+            <Check size={14} />
           </span>
           <span className="leading-relaxed">{item}</span>
         </li>
@@ -428,10 +487,7 @@ export default function ResumenEventosCriticosPage() {
           "El Directorio Legislativo declare alteración relevante del orden institucional.",
         ],
         sections: [
-          {
-            heading: "Activación inicial",
-            items: ["El plan se activa cuando:"],
-          },
+          { heading: "Activación inicial", items: ["El plan se activa cuando:"] },
           {
             heading: "Acciones inmediatas",
             items: [
@@ -484,31 +540,46 @@ export default function ResumenEventosCriticosPage() {
     []
   );
 
-  const [activeId, setActiveId] = useState<Plan["id"]>("naturales");
+  const [activeId, setActiveId] = useState<Plan["id"]>(plans[0].id);
   const activePlan = plans.find((p) => p.id === activeId) ?? plans[0];
   const meta = planMeta[activePlan.id];
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8">
-      {/* Header neutral */}
-      <header className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="space-y-3">
-          <p className="text-xs uppercase tracking-widest text-slate-500">
+    <main className="relative mx-auto w-full max-w-6xl px-4 py-8">
+      {/* background */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-sky-300/20 blur-3xl" />
+        <div className="absolute top-28 -left-24 h-72 w-72 rounded-full bg-indigo-300/15 blur-3xl" />
+        <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-fuchsia-300/10 blur-3xl" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-300/60 to-transparent" />
+      </div>
+
+      {/* HERO */}
+      <header className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/75 p-6 shadow-sm backdrop-blur">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/55 via-white/0 to-sky-100/35" />
+        <div className={classNames("pointer-events-none absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r opacity-90", meta.accent)} />
+
+        <div className="relative space-y-4">
+          <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
             Resumen de eventos críticos
           </p>
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-1">
-              <h1 className="text-2xl font-bold text-slate-900">
+              <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
                 Planes específicos por evento disruptivo
               </h1>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Seleccioná un plan para ver objetivo, escenarios y acciones por
-                fase (activación, inmediatas, primeras 24 horas y recuperación).
+                Seleccioná un plan para ver objetivo, escenarios y acciones por fase.
               </p>
             </div>
 
-            <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-sm text-slate-700 ring-1 ring-slate-200">
+            <div
+              className={classNames(
+                "inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm ring-1 bg-white/70 backdrop-blur shadow-sm",
+                meta.soft
+              )}
+            >
               <span className="grid place-content-center rounded-full bg-slate-900 text-white p-1">
                 {meta.icon}
               </span>
@@ -530,41 +601,43 @@ export default function ResumenEventosCriticosPage() {
         </div>
       </header>
 
-      {/* Content */}
-      <section role="tabpanel" aria-label={activePlan.title} className="mt-6 space-y-6">
-         <InfoCard title="Objetivo">
-    {activePlan.objective.split("\n\n").map((p, idx) => (
-      <p key={idx} className="text-sm text-slate-700 leading-relaxed">
-        {p}
-      </p>
-    ))}
-  </InfoCard>
+      {/* CONTENT */}
+      <section role="tabpanel" aria-label={activePlan.title} className="relative mt-6 space-y-6">
+        <GlassCard title="Objetivo" accent={meta.accent}>
+          <div className="space-y-3">
+            {activePlan.objective.split("\n\n").map((p, idx) => (
+              <p key={idx} className="text-sm text-slate-700 leading-relaxed">
+                {p}
+              </p>
+            ))}
+          </div>
+        </GlassCard>
 
-        <InfoCard title="Escenarios previstos">
+        <GlassCard title="Escenarios previstos" accent={meta.accent}>
           <BulletList items={activePlan.scenarios} />
-        </InfoCard>
+        </GlassCard>
 
         {activePlan.activation ? (
-          <InfoCard title="Activación inicial">
-            <p className="text-sm text-slate-700 leading-relaxed mb-3">
+          <GlassCard title="Activación inicial" accent={meta.accent}>
+            <p className="mb-3 text-sm text-slate-700 leading-relaxed">
               El plan se activa cuando:
             </p>
             <BulletList items={activePlan.activation} />
-          </InfoCard>
+          </GlassCard>
         ) : null}
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {activePlan.sections.map((sec) => (
-            <InfoCard key={sec.heading} title={sec.heading}>
+            <GlassCard key={sec.heading} title={sec.heading} accent={meta.accent}>
               <BulletList items={sec.items} />
-            </InfoCard>
+            </GlassCard>
           ))}
         </div>
 
         {activePlan.committees?.length ? (
-          <InfoCard title="Comités involucrados">
+          <GlassCard title="Comités involucrados" accent={meta.accent}>
             <BulletList items={activePlan.committees} />
-          </InfoCard>
+          </GlassCard>
         ) : null}
       </section>
     </main>

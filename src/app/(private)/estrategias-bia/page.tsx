@@ -252,45 +252,34 @@ export default function EstrategiasContinuidadPage() {
   return (
     <section className="px-6 pt-6 pb-10">
       {/* Header principal en card */}
-      <div className="mb-6 rounded-2xl bg-white/70 border border-slate-200 shadow-sm px-5 py-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <div className="inline-flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-700 border border-cyan-100">
-              Módulo de Estrategias de continuidad
-            </span>
-          </div>
+      <div className="relative mb-6 overflow-hidden rounded-3xl border border-slate-200/70 bg-white/75 px-5 py-5 shadow-sm backdrop-blur md:px-6">
+        {/* Accent + glow */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/45 via-white/0 to-sky-100/40" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500 opacity-90" />
+        <div className="pointer-events-none absolute -top-24 left-1/3 h-56 w-56 -translate-x-1/2 rounded-full bg-cyan-300/20 blur-3xl" />
 
-          <h1 className="text-2xl md:text-3xl font-semibold text-slate-900">
-            Estrategias de Continuidad
-          </h1>
+        <div className="relative flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          {/* Left: title */}
+          <div className="space-y-2">
+            <div className="inline-flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center rounded-full border border-cyan-200/70 bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-800">
+                Módulo de Estrategias de continuidad
+              </span>
+            </div>
 
-          <p className="mt-1 text-sm text-slate-600 max-w-2xl">
-            Revise y actualice las estrategias de prevención, contingencia,
-            recuperación y comunicación asociadas a los procesos críticos de cada
-            departamento.
-          </p>
-        </div>
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">
+              Estrategias de Continuidad
+            </h1>
 
-        <div className="flex flex-col gap-2 text-sm">
-          <div className="rounded-xl bg-slate-900 text-slate-50 px-4 py-2 min-w-[220px]">
-            <p className="text-[11px] uppercase tracking-[0.16em] text-slate-300 mb-1">
-              Resumen de la vista
+            <p className="max-w-2xl text-sm leading-relaxed text-slate-600">
+              Revise y actualice las estrategias de prevención, contingencia,
+              recuperación y comunicación asociadas a los procesos críticos de cada
+              departamento.
             </p>
-            <p className="text-xs text-slate-200">Departamento seleccionado:</p>
-            <p className="text-sm font-semibold">
-              {selected ? selectedLabel : "Ninguno seleccionado"}
-            </p>
-          </div>
-
-          <div className="flex items-center justify-between gap-4 text-[13px] text-slate-600">
-            <span className="flex items-center gap-1.5">
-              <span className="inline-flex h-2 w-2 rounded-full bg-cyan-500" />
-              Estrategias cargadas:
-            </span>
-            <span className="font-semibold text-slate-900">{rows.length}</span>
           </div>
         </div>
       </div>
+
 
       {/* Mensajes de estado */}
       {okMsg && (
@@ -332,9 +321,8 @@ export default function EstrategiasContinuidadPage() {
             >
               <span className="truncate">{selectedLabel}</span>
               <svg
-                className={`w-4 h-4 text-slate-500 transition-transform ${
-                  open ? "rotate-180" : "rotate-0"
-                }`}
+                className={`w-4 h-4 text-slate-500 transition-transform ${open ? "rotate-180" : "rotate-0"
+                  }`}
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -380,10 +368,9 @@ export default function EstrategiasContinuidadPage() {
                         className={`
                           w-full text-left px-4 py-2.5 text-xs
                           transition-all
-                          ${
-                            selected === op.id
-                              ? "bg-cyan-50 text-cyan-700 font-semibold"
-                              : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                          ${selected === op.id
+                            ? "bg-cyan-50 text-cyan-700 font-semibold"
+                            : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
                           }
                         `}
                         onClick={() => {

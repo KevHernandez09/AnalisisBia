@@ -433,13 +433,36 @@ export default function InsertarEstrategiaContinuidadPage() {
   return (
     <>
       <section className="text-black px-6 pt-6">
-        <header className="mb-6">
-          <h1 className="text-3xl font-bold">Estrategias de Continuidad</h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Registre, para un proceso crítico, las estrategias de prevención, contingencia,
-            recuperación y comunicación/divulgación.
-          </p>
+        <header className="relative mb-6 overflow-hidden rounded-3xl border border-slate-200/70 bg-white/75 px-5 py-5 shadow-sm backdrop-blur md:px-6">
+          {/* Accent + glow */}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/45 via-white/0 to-sky-100/40" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500 opacity-90" />
+          <div className="pointer-events-none absolute -top-24 left-1/2 h-52 w-52 -translate-x-1/2 rounded-full bg-cyan-300/20 blur-3xl" />
+
+          <div className="relative space-y-2">
+            {/* Chip superior */}
+            <span className="inline-flex items-center rounded-full border border-cyan-200/70 bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-800">
+              Formulario de Estrategias de Continuidad
+            </span>
+
+            {/* Título */}
+            <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-slate-900">
+              Estrategias de Continuidad
+            </h1>
+
+            {/* Descripción */}
+            <p className="max-w-2xl text-sm leading-relaxed text-slate-600">
+              Registre, para un proceso crítico, las estrategias de prevención,
+              contingencia, recuperación y comunicación/divulgación.
+            </p>
+
+            {/* Divider sutil */}
+            <div className="pt-2">
+              <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-200/80 to-transparent" />
+            </div>
+          </div>
         </header>
+
 
         <div className="bg-white/90 border border-gray-200 rounded-2xl shadow-md p-5 md:p-7">
           {okMsg && (

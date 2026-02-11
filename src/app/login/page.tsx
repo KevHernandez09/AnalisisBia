@@ -55,7 +55,7 @@ export default function LoginPage() {
             <div className="flex items-center gap-3">
               <div className="relative h-12 w-12 rounded-2xl bg-slate-900/70 border border-slate-700/70 flex items-center justify-center overflow-hidden">
                 <Image
-                  src="/logo-institucion.png"
+                  src="/logo.png"
                   alt="Logo institucional"
                   fill
                   className="object-contain p-1.5"

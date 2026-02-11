@@ -1,7 +1,14 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
-import { ShieldCheck, Siren, RotateCcw, Megaphone, ChevronRight } from "lucide-react";
+import {
+    ShieldCheck,
+    Siren,
+    RotateCcw,
+    Megaphone,
+    ChevronRight,
+    Check,
+} from "lucide-react";
 
 type StrategyBlock = {
     heading: string;
@@ -21,23 +28,41 @@ function classNames(...classes: Array<string | false | null | undefined>) {
 
 const sectionMeta: Record<
     StrategySection["id"],
-    { short: string; icon: ReactNode }
+    { short: string; icon: ReactNode; accent: string; soft: string }
 > = {
-    prevencion: { short: "Prevención", icon: <ShieldCheck size={16} /> },
-    contingencia: { short: "Contingencia", icon: <Siren size={16} /> },
-    recuperacion: { short: "Recuperación", icon: <RotateCcw size={16} /> },
-    comunicacion: { short: "Comunicación", icon: <Megaphone size={16} /> },
+    prevencion: {
+        short: "Prevención",
+        icon: <ShieldCheck size={16} />,
+        accent: "from-emerald-500 to-sky-500",
+        soft: "bg-emerald-500/10 text-emerald-700 ring-emerald-200/70",
+    },
+    contingencia: {
+        short: "Contingencia",
+        icon: <Siren size={16} />,
+        accent: "from-amber-500 to-orange-500",
+        soft: "bg-amber-500/10 text-amber-700 ring-amber-200/70",
+    },
+    recuperacion: {
+        short: "Recuperación",
+        icon: <RotateCcw size={16} />,
+        accent: "from-indigo-500 to-fuchsia-500",
+        soft: "bg-indigo-500/10 text-indigo-700 ring-indigo-200/70",
+    },
+    comunicacion: {
+        short: "Comunicación",
+        icon: <Megaphone size={16} />,
+        accent: "from-sky-500 to-violet-500",
+        soft: "bg-sky-500/10 text-sky-700 ring-sky-200/70",
+    },
 };
 
 function TabButton({
     active,
     id,
-    label,
     onClick,
 }: {
     active: boolean;
     id: StrategySection["id"];
-    label: string;
     onClick: () => void;
 }) {
     const meta = sectionMeta[id];
@@ -49,13 +74,23 @@ function TabButton({
             role="tab"
             aria-selected={active}
             className={classNames(
-                "group inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm transition",
+                "group relative inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm transition",
                 "focus:outline-none focus:ring-2 focus:ring-slate-300",
                 active
-                    ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-                    : "bg-white/80 text-slate-700 border-slate-200 hover:bg-white"
+                    ? "border-slate-900 bg-slate-900 text-white shadow-sm"
+                    : "border-slate-200 bg-white/70 text-slate-700 hover:bg-white"
             )}
         >
+            {active ? (
+                <span
+                    className={classNames(
+                        "pointer-events-none absolute inset-x-1 -bottom-2 h-1 rounded-full bg-gradient-to-r opacity-90",
+                        sectionMeta[id].accent
+                    )}
+                    aria-hidden="true"
+                />
+            ) : null}
+
             <span
                 className={classNames(
                     "grid place-content-center rounded-full border p-1 transition",
@@ -81,27 +116,42 @@ function TabButton({
     );
 }
 
-function BlockCard({ block }: { block: StrategyBlock }) {
+function BlockCard({
+    block,
+    accent,
+}: {
+    block: StrategyBlock;
+    accent: string;
+}) {
     return (
         <article
             className={classNames(
-                "relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm",
+                "group relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/75 shadow-sm backdrop-blur",
                 "transition hover:-translate-y-0.5 hover:shadow-md"
             )}
         >
+            <div
+                className={classNames(
+                    "pointer-events-none absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r opacity-90",
+                    accent
+                )}
+            />
+
             <header className="px-5 pt-5 pb-3">
-                <h3 className="text-base font-semibold text-slate-900">{block.heading}</h3>
+                <h3 className="text-base font-semibold text-slate-900">
+                    {block.heading}
+                </h3>
             </header>
 
             <div className="px-5 pb-5">
                 <ul className="space-y-2.5 text-sm text-slate-700">
-                    {block.items.map((item) => (
-                        <li key={item} className="flex gap-2.5">
+                    {block.items.map((item, idx) => (
+                        <li key={`${block.heading}-${idx}`} className="flex gap-2.5">
                             <span
-                                className="mt-1.5 h-5 w-5 rounded-full bg-slate-100 text-slate-600 grid place-content-center shrink-0"
+                                className="mt-0.5 grid h-6 w-6 place-content-center rounded-full bg-white text-slate-600 ring-1 ring-slate-200 shrink-0"
                                 aria-hidden="true"
                             >
-                                •
+                                <Check size={14} />
                             </span>
                             <span className="leading-relaxed">{item}</span>
                         </li>
@@ -335,26 +385,67 @@ export default function ResumenEstrategiasPage() {
         []
     );
 
-    const [activeId, setActiveId] = useState<StrategySection["id"]>("prevencion");
+    // Guard clause anti-crash (SSR/CSR)
+    if (sections.length === 0) {
+        return (
+            <main className="mx-auto w-full max-w-6xl px-4 py-8">
+                <div className="rounded-3xl border border-slate-200/70 bg-white/75 p-6 shadow-sm backdrop-blur">
+                    <h1 className="text-lg font-semibold text-slate-900">
+                        No hay estrategias cargadas
+                    </h1>
+                    <p className="mt-1 text-sm text-slate-600">
+                        Verificá el arreglo <code className="font-mono">sections</code>.
+                    </p>
+                </div>
+            </main>
+        );
+    }
+
+    const [activeId, setActiveId] = useState<StrategySection["id"]>(sections[0].id);
+
     const activeSection = sections.find((s) => s.id === activeId) ?? sections[0];
     const meta = sectionMeta[activeSection.id];
 
     return (
-        <main className="mx-auto w-full max-w-6xl px-4 py-8">
-            <header className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="space-y-3">
-                    <p className="text-xs uppercase tracking-widest text-slate-500">
+        <main className="relative mx-auto w-full max-w-6xl px-4 py-8">
+            {/* background */}
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                <div className="absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-sky-300/25 blur-3xl" />
+                <div className="absolute top-28 -left-24 h-72 w-72 rounded-full bg-indigo-300/20 blur-3xl" />
+                <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-fuchsia-300/15 blur-3xl" />
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-300/60 to-transparent" />
+            </div>
+
+            {/* header */}
+            <header className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/75 p-6 shadow-sm backdrop-blur">
+                <div
+                    className={classNames(
+                        "pointer-events-none absolute inset-0 bg-gradient-to-br opacity-90",
+                        "from-white/50 via-white/0 to-sky-100/40"
+                    )}
+                />
+
+                <div className="relative space-y-4">
+                    <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
                         Resumen por tipo de estrategias
                     </p>
 
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div className="space-y-1">
-                            <h1 className="text-2xl font-bold text-slate-900">
+                            <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
                                 Continuidad institucional
                             </h1>
+                            <p className="text-sm text-slate-600">
+                                Navegá por categoría y revisá los bloques clave de cada plan.
+                            </p>
                         </div>
 
-                        <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-sm text-slate-700 ring-1 ring-slate-200">
+                        <div
+                            className={classNames(
+                                "inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm ring-1 bg-white/70 backdrop-blur shadow-sm",
+                                meta.soft
+                            )}
+                        >
                             <span className="grid place-content-center rounded-full bg-slate-900 text-white p-1">
                                 {meta.icon}
                             </span>
@@ -368,7 +459,6 @@ export default function ResumenEstrategiasPage() {
                                 key={s.id}
                                 id={s.id}
                                 active={s.id === activeId}
-                                label={s.title}
                                 onClick={() => setActiveId(s.id)}
                             />
                         ))}
@@ -376,19 +466,17 @@ export default function ResumenEstrategiasPage() {
                 </div>
             </header>
 
-            <section role="tabpanel" aria-label={activeSection.title} className="mt-6 space-y-6">
-                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <h2 className="text-lg font-semibold text-slate-900">
-                        {activeSection.title}
-                    </h2>
-                    <p className="mt-1 text-sm text-slate-600 leading-relaxed">
-                        {activeSection.description}
-                    </p>
+            {/* content */}
+            <section role="tabpanel" aria-label={activeSection.title} className="relative mt-6 space-y-6">
+                <div className="overflow-hidden rounded-3xl border border-slate-200/70 bg-white/75 p-5 shadow-sm backdrop-blur">
+                    <div className={classNames("mb-3 h-1.5 w-16 rounded-full bg-gradient-to-r", meta.accent)} />
+                    <h2 className="text-lg font-semibold text-slate-900">{activeSection.title}</h2>
+                    <p className="mt-1 text-sm leading-relaxed text-slate-600">{activeSection.description}</p>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                     {activeSection.blocks.map((block) => (
-                        <BlockCard key={block.heading} block={block} />
+                        <BlockCard key={block.heading} block={block} accent={meta.accent} />
                     ))}
                 </div>
             </section>

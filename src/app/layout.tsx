@@ -5,6 +5,9 @@ import type { ReactNode } from "react";
 export const metadata = {
   title: "WRMJ",
   description: "Gestión de Análisis BIA y Procesos Críticos",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

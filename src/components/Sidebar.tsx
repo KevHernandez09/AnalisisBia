@@ -54,7 +54,7 @@ export default function Sidebar() {
       items: [
         {
           href: "/analisis-bia",
-          label: "Visualizar Análisis BIA",
+          label: "Visualizar Procesos Críticos",
           icon: <FileText size={18} />,
         },
         {
@@ -69,12 +69,12 @@ export default function Sidebar() {
         },
         {
           href: "/resumen-estrategias",
-          label: "Resumen por tipo de estrategias",
+          label: "Resumen Estrategias Continuidad",
           icon: <BarChart3 size={18} />,
         },
         {
           href: "/resumen-eventos-criticos",
-          label: "Resumen de eventos críticos",
+          label: "Resumen Procesos Críticos",
           icon: <AlertTriangle size={18} />,
         },
       ],
@@ -137,7 +137,7 @@ export default function Sidebar() {
           <div className="flex items-center gap-3">
             <div className={`${collapsed ? "w-9 h-9" : "w-12 h-12"} relative`}>
               <Image
-                src="/logo-institucion.png"
+                src="/logo.png"
                 alt="Logo Institucional"
                 fill
                 className="object-contain"

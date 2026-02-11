@@ -12,7 +12,7 @@ const planes = [
   { id: "1", label: "Comisión Institucional de Presupuesto" },
   { id: "2", label: "CISAAL" },
 
-  
+
 ];
 
 export default function PlanPage() {
@@ -109,10 +109,35 @@ export default function PlanPage() {
 
   return (
     <section className="text-black px-6 pt-6">
-      <h1 className="text-3xl font-bold mb-2">Insertar Plan de Acción</h1>
-      <p className="text-sm text-gray-600 mb-6">
-        Complete la siguiente información para registrar un nuevo plan de Acción.
-      </p>
+      <div className="relative mb-6 overflow-hidden rounded-3xl border border-slate-200/70 bg-white/75 px-5 py-5 shadow-sm backdrop-blur md:px-6">
+        {/* Accent + glow */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/45 via-white/0 to-sky-100/40" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500 opacity-90" />
+        <div className="pointer-events-none absolute -top-24 left-1/2 h-52 w-52 -translate-x-1/2 rounded-full bg-cyan-300/20 blur-3xl" />
+
+        <div className="relative space-y-2">
+          {/* Chip contextual */}
+          <span className="inline-flex items-center rounded-full border border-cyan-200/70 bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-800">
+            Formulario de Planes de Acción
+          </span>
+
+          {/* Título */}
+          <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-slate-900">
+            Insertar Plan de Acción
+          </h1>
+
+          {/* Descripción */}
+          <p className="max-w-2xl text-sm leading-relaxed text-slate-600">
+            Complete la siguiente información para registrar un nuevo plan de acción.
+          </p>
+
+          {/* Divider */}
+          <div className="pt-2">
+            <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-200/80 to-transparent" />
+          </div>
+        </div>
+      </div>
+
 
       {okMsg && (
         <div className="mb-4 rounded border border-green-300 bg-green-50 px-3 py-2 text-sm text-green-800">
@@ -158,9 +183,8 @@ export default function PlanPage() {
               <span>{selectedLabel}</span>
 
               <svg
-                className={`w-5 h-5 text-gray-500 transition-transform ${
-                  open ? "rotate-180" : "rotate-0"
-                }`}
+                className={`w-5 h-5 text-gray-500 transition-transform ${open ? "rotate-180" : "rotate-0"
+                  }`}
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -203,10 +227,9 @@ export default function PlanPage() {
                         key={op.id}
                         className={`
                           px-4 py-2.5 cursor-pointer text-sm transition-all
-                          ${
-                            selected === op.id
-                              ? "bg-[#0073a4]/10 text-[#0073a4] font-semibold"
-                              : "hover:bg-gray-100"
+                          ${selected === op.id
+                            ? "bg-[#0073a4]/10 text-[#0073a4] font-semibold"
+                            : "hover:bg-gray-100"
                           }
                         `}
                         onClick={() => {
@@ -229,7 +252,7 @@ export default function PlanPage() {
             )}
           </div>
 
-          {planError && ( 
+          {planError && (
             <p className="text-xs text-red-600 mt-1">{planError}</p>
           )}
         </div>
