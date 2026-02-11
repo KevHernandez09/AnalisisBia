@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Home,
   BarChart3,
+  AlertTriangle,
 } from "lucide-react";
 
 type NavLink = {
@@ -66,12 +67,15 @@ export default function Sidebar() {
           label: "Visualizar Plan de Acción",
           icon: <ListTodo size={18} />,
         },
-
-        // ✅ NUEVO: página del PDF
         {
           href: "/resumen-estrategias",
           label: "Resumen por tipo de estrategias",
           icon: <BarChart3 size={18} />,
+        },
+        {
+          href: "/resumen-eventos-criticos",
+          label: "Resumen de eventos críticos",
+          icon: <AlertTriangle size={18} />,
         },
       ],
     },
@@ -173,7 +177,7 @@ export default function Sidebar() {
 
               <div className="space-y-1">
                 {section.items.map(({ href, label, icon }) => {
-                  const active = pathname === href;
+                  const active = pathname === href || pathname.startsWith(`${href}/`);
 
                   return (
                     <div key={href} className="relative group">
@@ -286,10 +290,7 @@ export default function Sidebar() {
               </button>
               <button
                 type="button"
-                onClick={async () => {
-                  setShowLogoutModal(false);
-                  await handleLogout();
-                }}
+                onClick={confirmLogout}
                 className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-red-500 to-rose-500 text-white font-medium hover:from-red-400 hover:to-rose-400 shadow-md shadow-red-900/40 transition flex items-center gap-1.5"
               >
                 <LogOut size={16} />

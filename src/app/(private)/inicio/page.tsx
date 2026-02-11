@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Image from "next/image";
 import {
   Workflow,
@@ -20,6 +20,7 @@ import {
   PieChart,
   Pie,
   Cell,
+  CartesianGrid,
 } from "recharts";
 
 type ProcesoPrioridad = {
@@ -55,42 +56,145 @@ const PRIORIDAD_LABELS: Record<string, string> = {
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  Alta: "#ef4444", // rojo
-  Media: "#eab308", // amarillo
-  Baja: "#22c55e", // verde
+  Alta: "#ef4444",
+  Media: "#eab308",
+  Baja: "#22c55e",
 };
 
 const PRIORITY_ORDER: ("Alta" | "Media" | "Baja")[] = ["Alta", "Media", "Baja"];
 
-// Paleta para barras de estrategias por tipo
 const STRATEGY_COLORS = [
-  "#38bdf8", // cyan
-  "#22c55e", // verde
-  "#eab308", // amarillo
-  "#f97316", // naranja
-  "#6366f1", // violeta
-  "#ec4899", // rosado
+  "#38bdf8",
+  "#22c55e",
+  "#eab308",
+  "#f97316",
+  "#6366f1",
+  "#ec4899",
 ];
+
+function cx(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
 
 function PriorityLegend({
   items,
 }: {
-  items: { prioridad: string; color: string }[];
+  items: { prioridad: string; color: string; count: number }[];
 }) {
   return (
-    <div className="flex items-center justify-center gap-8 mt-4 flex-wrap">
+    <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
       {items.map((item) => (
         <div
           key={item.prioridad}
-          className="flex items-center gap-2 text-sm text-slate-100"
+          className="flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/70 px-3 py-1 text-xs text-slate-700 shadow-sm backdrop-blur"
         >
-          <div
-            className="w-4 h-4 rounded-sm"
+          <span
+            className="h-2.5 w-2.5 rounded-full"
             style={{ backgroundColor: item.color }}
           />
-          <span>{PRIORIDAD_LABELS[item.prioridad] ?? item.prioridad}</span>
+          <span className="font-medium">
+            {PRIORIDAD_LABELS[item.prioridad] ?? item.prioridad}
+          </span>
+          <span className="text-slate-500">•</span>
+          <span className="tabular-nums text-slate-600">{item.count}</span>
         </div>
       ))}
+    </div>
+  );
+}
+
+function GlassCard({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section
+      className={cx(
+        "relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/75 shadow-[0_12px_40px_-20px_rgba(15,23,42,0.35)] backdrop-blur",
+        className
+      )}
+    >
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/40 via-white/0 to-sky-100/40" />
+      <div className="relative">{children}</div>
+    </section>
+  );
+}
+
+function StatCard({
+  icon,
+  label,
+  value,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: number;
+}) {
+  return (
+    <div className="group relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/75 p-4 shadow-sm backdrop-blur transition will-change-transform hover:-translate-y-0.5 hover:shadow-md focus-within:shadow-md">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-400 opacity-80" />
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            {label}
+          </p>
+          <p className="mt-2 text-3xl font-semibold leading-none text-slate-900 tabular-nums">
+            {value}
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-2 text-sky-700 shadow-sm transition group-hover:scale-[1.02]">
+          {icon}
+        </div>
+      </div>
+
+      <div className="mt-3 h-px w-full bg-gradient-to-r from-transparent via-slate-200/80 to-transparent" />
+    </div>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <div className="animate-pulse rounded-3xl border border-slate-200/70 bg-white/70 p-4 shadow-sm backdrop-blur">
+      <div className="h-2 w-24 rounded bg-slate-200/80" />
+      <div className="mt-3 h-8 w-16 rounded bg-slate-200/80" />
+      <div className="mt-5 h-2 w-full rounded bg-slate-200/60" />
+      <div className="mt-3 h-2 w-2/3 rounded bg-slate-200/60" />
+    </div>
+  );
+}
+
+function ChartTooltip({
+  active,
+  payload,
+  label,
+  kind,
+}: {
+  active?: boolean;
+  payload?: readonly any[];
+  label?: string | number;
+  kind: "bar" | "pie";
+}) {
+  if (!active || !payload?.length) return null;
+
+  const p = payload[0] as any;
+
+  const name =
+    kind === "bar"
+      ? p?.payload?.tipo ?? label
+      : PRIORIDAD_LABELS[p?.payload?.prioridad] ?? p?.payload?.prioridad;
+
+  const value = p?.value ?? p?.payload?.count ?? 0;
+
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white/90 px-3 py-2 text-xs text-slate-700 shadow-lg backdrop-blur">
+      <p className="font-semibold text-slate-900">{String(name ?? "")}</p>
+      <p className="mt-1">
+        <span className="text-slate-500">Cantidad: </span>
+        <span className="font-medium tabular-nums">{value}</span>
+      </p>
     </div>
   );
 }
@@ -98,7 +202,6 @@ function PriorityLegend({
 export default function InicioPage() {
   const [stats, setStats] = useState<StatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
-
   const [currentUser, setCurrentUser] = useState<MeUser | null>(null);
 
   useEffect(() => {
@@ -120,9 +223,7 @@ export default function InicioPage() {
         const res = await fetch("/api/me", { credentials: "include" });
         if (!res.ok) return;
         const data = await res.json();
-        if (data.user) {
-          setCurrentUser(data.user as MeUser);
-        }
+        if (data.user) setCurrentUser(data.user as MeUser);
       } catch (err) {
         console.error("Error cargando usuario actual:", err);
       }
@@ -131,51 +232,79 @@ export default function InicioPage() {
   }, []);
 
   const displayUserName =
-    currentUser?.name?.trim() ||
-    currentUser?.email ||
-    "Usuario autenticado";
+    currentUser?.name?.trim() || currentUser?.email || "Usuario autenticado";
+
+  const priorityData = useMemo(() => {
+    const raw = stats?.procesosPorPrioridad ?? [];
+    return PRIORITY_ORDER.map((p) => {
+      const found = raw.find((r) => r.prioridad === p);
+      return { prioridad: p, count: found ? found.count : 0 };
+    });
+  }, [stats?.procesosPorPrioridad]);
+
+  const totalPriority = useMemo(() => {
+    return priorityData.reduce((acc, cur) => acc + cur.count, 0);
+  }, [priorityData]);
 
   return (
-    <main className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.15),transparent_60%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.18),transparent_60%)]" />
+    <main className="relative min-h-screen text-slate-900">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-sky-300/30 blur-3xl" />
+        <div className="absolute top-20 -left-20 h-72 w-72 rounded-full bg-indigo-300/20 blur-3xl" />
+        <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-fuchsia-300/20 blur-3xl" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-300/60 to-transparent" />
+      </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-6 py-10 space-y-10">
-        {/* HEADER */}
-        <header className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="relative w-20 h-20 md:w-24 md:h-24 drop-shadow-xl">
-              <Image
-                src="/logo-institucion.png"
-                alt="Logo Institucional"
-                fill
-                className="object-contain"
-              />
+      <div className="relative mx-auto max-w-7xl px-2 pt-6 pb-10 space-y-8">
+        {/*HEADER */}
+        <GlassCard className="p-6 md:p-8">
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-4">
+              <div className="relative h-16 w-16 md:h-20 md:w-20">
+                <div className="absolute inset-0 rounded-2xl bg-white/70 shadow-sm" />
+                <Image
+                  src="/logo-institucion.png"
+                  alt="Logo Institucional"
+                  fill
+                  className="object-contain p-2"
+                  priority
+                />
+              </div>
+
+              <div>
+                <h1 className="text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">
+                 GRMJ
+                </h1>
+                <p className="mt-1 text-sm text-slate-600">
+                  Resumen institucional del BIA y continuidad operativa.
+                </p>
+
+                <div className="absolute right-6 top-4">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/70 px-3 py-1 text-xs text-slate-700 shadow-sm backdrop-blur">
+                    <UserCheck size={14} />
+                    <span className="font-medium">{displayUserName}</span>
+                  </span>
+                </div>
+
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold">
-                Panel principal del Sistema GRMJ
-              </h1>
-              <p className="text-slate-300 text-sm md:text-base mt-1">
-                Resumen institucional del BIA y continuidad operativa.
-              </p>
-            </div>
-          </div>
 
-          {/* Badge de usuario con nombre/correo */}
-          <div className="flex items-center gap-2 text-sm text-slate-300">
-            <UserCheck size={18} />
-            <span>{displayUserName}</span>
           </div>
-        </header>
+        </GlassCard>
 
+        {/* LOADING */}
         {loading && (
-          <p className="text-slate-300 text-sm">Cargando estadísticas…</p>
+          <section className="grid gap-4 md:grid-cols-5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </section>
         )}
 
+        {/* CONTENT */}
         {stats && (
           <>
-            {/* TARJETAS RESUMEN */}
-            <section className="grid md:grid-cols-5 gap-4">
+            <section className="grid gap-4 md:grid-cols-5">
               <StatCard
                 icon={<LayoutGrid size={22} />}
                 label="Departamentos"
@@ -203,148 +332,153 @@ export default function InicioPage() {
               />
             </section>
 
-            {/* PROCESOS POR PRIORIDAD */}
-            <section className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/10 p-6 flex flex-col mt-4">
-              <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                <ShieldCheck size={18} /> Procesos críticos por prioridad
-              </h2>
-              <p className="text-xs text-slate-300 mb-4">
-                Distribución total según prioridad institucional (Alta, Media,
-                Baja).
-              </p>
+            {/* CHARTS GRID */}
+            <section className="grid gap-6 lg:grid-cols-2">
+              <GlassCard className="p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
+                      <ShieldCheck size={18} />
+                      Procesos críticos por prioridad
+                    </h2>
+                    <p className="mt-1 text-xs text-slate-600">
+                      Distribución total según prioridad institucional.
+                    </p>
+                  </div>
 
-              {(() => {
-                const raw = stats.procesosPorPrioridad || [];
-                const priorityData: ProcesoPrioridad[] = PRIORITY_ORDER.map(
-                  (p) => {
-                    const found = raw.find((r) => r.prioridad === p);
-                    return {
-                      prioridad: p,
-                      count: found ? found.count : 0,
-                    };
-                  }
-                );
+                  <span className="rounded-full border border-slate-200/70 bg-white/60 px-3 py-1 text-xs text-slate-600 backdrop-blur">
+                    Total:{" "}
+                    <span className="font-semibold text-slate-900 tabular-nums">
+                      {totalPriority}
+                    </span>
+                  </span>
+                </div>
 
-                const total = priorityData.reduce(
-                  (acc, cur) => acc + cur.count,
-                  0
-                );
+                <div className="mt-4">
+                  {totalPriority === 0 ? (
+                    <div className="flex h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white/40 text-sm text-slate-600">
+                      <p className="font-medium text-slate-900">
+                        No hay procesos críticos registrados aún.
+                      </p>
 
-                if (total === 0) {
-                  return (
-                    <div className="h-40 flex flex-col items-center justify-center text-slate-300 text-sm">
-                      <p>No hay procesos críticos registrados aún.</p>
                     </div>
-                  );
-                }
+                  ) : (
+                    <>
+                      <div className="h-64">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={priorityData}
+                              dataKey="count"
+                              nameKey="prioridad"
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={62}
+                              outerRadius={92}
+                              paddingAngle={5}
+                              stroke="rgba(255,255,255,0.9)"
+                              strokeWidth={2}
+                            >
+                              {priorityData.map((entry) => (
+                                <Cell
+                                  key={entry.prioridad}
+                                  fill={PRIORITY_COLORS[entry.prioridad] ?? "#6b7280"}
+                                />
+                              ))}
+                            </Pie>
+                            <Tooltip
+                              content={(props) => (
+                                <ChartTooltip {...props} kind="pie" />
+                              )}
+                            />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+                      <PriorityLegend
+                        items={priorityData.map((p) => ({
+                          prioridad: p.prioridad,
+                          color: PRIORITY_COLORS[p.prioridad] ?? "#6b7280",
+                          count: p.count,
+                        }))}
+                      />
+                    </>
+                  )}
+                </div>
+              </GlassCard>
 
-                return (
-                  <>
-                    <div className="w-full h-64 flex items-center justify-center">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={priorityData}
-                            dataKey="count"
-                            nameKey="prioridad"
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={55}
-                            outerRadius={85}
-                            paddingAngle={4}
-                          >
-                            {priorityData.map((entry) => (
-                              <Cell
-                                key={entry.prioridad}
-                                fill={
-                                  PRIORITY_COLORS[entry.prioridad] ??
-                                  "#6b7280"
-                                }
-                              />
-                            ))}
-                          </Pie>
-                          <Tooltip
-                            formatter={(value: any, _name: any, props: any) => [
-                              `${value} procesos`,
-                              PRIORIDAD_LABELS[props.payload.prioridad] ??
-                                props.payload.prioridad,
-                            ]}
+              {/* BAR */}
+              <GlassCard className="p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
+                      <Workflow size={18} />
+                      Estrategias por tipo
+                    </h2>
+                    <p className="mt-1 text-xs text-slate-600">
+                      Cantidad de estrategias registradas según su tipo principal.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 h-72">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={stats.estrategiasPorTipo}
+                      margin={{ top: 8, right: 10, left: 0, bottom: 8 }}
+                    >
+                      <CartesianGrid strokeDasharray="4 6" opacity={0.35} />
+                      <XAxis
+                        dataKey="tipo"
+                        tick={{ fontSize: 11 }}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <XAxis
+                        dataKey="tipo"
+                        tick={false}
+                        tickLine={false}
+                        axisLine={false}
+                        height={0}
+                      />
+
+                      <Tooltip
+                        content={(props) => <ChartTooltip {...props} kind="bar" />}
+                      />
+                      <Bar dataKey="count" radius={[10, 10, 0, 0]} maxBarSize={46}>
+                        {stats.estrategiasPorTipo.map((entry, index) => (
+                          <Cell
+                            key={`bar-${entry.tipo}-${index}`}
+                            fill={STRATEGY_COLORS[index % STRATEGY_COLORS.length]}
                           />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
 
-                    <PriorityLegend
-                      items={priorityData.map((p) => ({
-                        prioridad: p.prioridad,
-                        color:
-                          PRIORITY_COLORS[p.prioridad] ?? "#6b7280",
-                      }))}
-                    />
-                  </>
-                );
-              })()}
-            </section>
-
-            {/* ESTRATEGIAS POR TIPO */}
-            <section className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/10 p-6 flex flex-col mt-6">
-              <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                <Workflow size={18} /> Estrategias por tipo
-              </h2>
-              <p className="text-xs text-slate-300 mb-4">
-                Cantidad de estrategias registradas según su tipo principal.
-              </p>
-
-              <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats.estrategiasPorTipo}>
-                    <XAxis dataKey="tipo" tick={{ fontSize: 11 }} />
-                    <YAxis />
-                    <Tooltip
-                      formatter={(value: any, _name: any, props: any) => [
-                        `${value} estrategias`,
-                        props.payload.tipo,
-                      ]}
-                    />
-                    <Bar dataKey="count" radius={[6, 6, 0, 0]}>
-                      {stats.estrategiasPorTipo.map((entry, index) => (
-                        <Cell
-                          key={`bar-${entry.tipo}-${index}`}
-                          fill={
-                            STRATEGY_COLORS[index % STRATEGY_COLORS.length]
-                          }
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {stats.estrategiasPorTipo.slice(0, 6).map((e, i) => (
+                    <span
+                      key={`${e.tipo}-${i}`}
+                      className="inline-flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/60 px-3 py-1 text-xs text-slate-700 backdrop-blur"
+                    >
+                      <span
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{
+                          backgroundColor: STRATEGY_COLORS[i % STRATEGY_COLORS.length],
+                        }}
+                      />
+                      <span className="font-medium">{e.tipo}</span>
+                      <span className="text-slate-500">•</span>
+                      <span className="tabular-nums text-slate-600">{e.count}</span>
+                    </span>
+                  ))}
+                </div>
+              </GlassCard>
             </section>
           </>
         )}
       </div>
     </main>
-  );
-}
-
-function StatCard({
-  icon,
-  label,
-  value,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: number;
-}) {
-  return (
-    <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/10 p-4 flex flex-col gap-2">
-      <div className="flex items-center justify-between">
-        <span className="text-xs uppercase tracking-widest text-slate-300">
-          {label}
-        </span>
-        <div className="text-cyan-400">{icon}</div>
-      </div>
-      <div className="text-2xl font-semibold">{value}</div>
-    </div>
   );
 }
