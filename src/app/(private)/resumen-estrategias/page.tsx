@@ -202,8 +202,9 @@ export default function ResumenEstrategiasPage() {
                     {
                         heading: "Prevención basada en Seguridad Parlamentaria",
                         items: [
-                            "Brindar capacitación en materia de continuidad institucional.",
-                            "Dar a conocer los protocolos de conocimiento general hacia la Comunidad Legislativa.",
+                            "Revisión periódica de los accesos y anillos de seguridad.",
+                            "Actualización periódica de protocolos y procedimientos de seguridad.",
+                            "Verificación y actualización de planes de emergencia.",
                         ],
                     },
                     {
