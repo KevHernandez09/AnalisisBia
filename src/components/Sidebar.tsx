@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Home,
+  BarChart3,
 } from "lucide-react";
 
 type NavLink = {
@@ -64,6 +65,13 @@ export default function Sidebar() {
           href: "/lista",
           label: "Visualizar Plan de Acción",
           icon: <ListTodo size={18} />,
+        },
+
+        // ✅ NUEVO: página del PDF
+        {
+          href: "/resumen-estrategias",
+          label: "Resumen por tipo de estrategias",
+          icon: <BarChart3 size={18} />,
         },
       ],
     },
@@ -149,11 +157,7 @@ export default function Sidebar() {
             onClick={() => setCollapsed((p) => !p)}
             className="w-8 h-8 grid place-content-center rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition"
           >
-            {collapsed ? (
-              <ChevronRight size={16} />
-            ) : (
-              <ChevronLeft size={16} />
-            )}
+            {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
           </button>
         </div>
 
@@ -185,9 +189,7 @@ export default function Sidebar() {
                         }`}
                       >
                         {icon}
-                        {!collapsed && (
-                          <span className="truncate">{label}</span>
-                        )}
+                        {!collapsed && <span className="truncate">{label}</span>}
                       </Link>
 
                       {/* Tooltip en modo colapsado */}
@@ -206,7 +208,7 @@ export default function Sidebar() {
           ))}
         </nav>
 
-        {/* FOOTER ABAJO (SE MUEVE CON EL SCROLL DE LA PÁGINA) */}
+        {/* FOOTER ABAJO */}
         <div className="mt-auto border-t border-white/10 px-4 py-4 space-y-3 text-sm">
           <Link
             href="/soporte"
@@ -248,14 +250,12 @@ export default function Sidebar() {
           aria-modal="true"
           role="dialog"
         >
-          {/* Overlay */}
           <button
             type="button"
             className="absolute inset-0 bg-black/60"
             onClick={() => setShowLogoutModal(false)}
           />
 
-          {/* Caja de diálogo */}
           <div className="relative z-50 w-full max-w-sm mx-4 rounded-2xl bg-slate-900 border border-slate-700/80 shadow-2xl shadow-black/60 p-5">
             <div className="flex items-center gap-3 mb-3">
               <div className="h-9 w-9 rounded-full bg-red-500/15 flex items-center justify-center text-red-400">
@@ -286,7 +286,10 @@ export default function Sidebar() {
               </button>
               <button
                 type="button"
-                onClick={confirmLogout}
+                onClick={async () => {
+                  setShowLogoutModal(false);
+                  await handleLogout();
+                }}
                 className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-red-500 to-rose-500 text-white font-medium hover:from-red-400 hover:to-rose-400 shadow-md shadow-red-900/40 transition flex items-center gap-1.5"
               >
                 <LogOut size={16} />
